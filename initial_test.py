@@ -1,12 +1,17 @@
 import argparse
+import json
+import logging
 import os
-from string import punctuation, Template
-import subprocess
-import sys
+from string import punctuation
 import time
+import xml.etree.ElementTree as ET
 
 from gensim.models.doc2vec import LabeledSentence, Doc2Vec
 from nltk import sent_tokenize, WordPunctTokenizer
+import requests
+from tika import parser as tikaparser
+
+from local_settings import DSPACE_OAI_IDENTIFIER, DSPACE_OAI_URI
 
 # Get documents
 # Thoughts...
@@ -21,6 +26,8 @@ from nltk import sent_tokenize, WordPunctTokenizer
 # Next step will involve network file access.
 
 # See https://medium.com/@klintcho/doc2vec-tutorial-using-gensim-ab3ac03d3a1
+
+logger = logging.getLogger(__name__)
 
 THESIS_SUBDIRS = [
     'aero_astro',
@@ -61,21 +68,18 @@ THESIS_SUBDIRS = [
     'various_historical_departments'
 ]
 
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+with open(CUR_DIR + '/thesis_set_list.json', 'r') as f:
+    THESIS_SET_LIST = json.loads(f.read())
+
 
 class LabeledLineSentence(object):
-    def __init__(self, doc_list, docs_dir):
-        self.doc_list = doc_list
-        self.DOCS_ABSOLUTE_DIR = docs_dir
+    def __init__(self, doc_yielder):
+        self.doc_yielder = doc_yielder
 
     def __iter__(self):
-        for doc in self.doc_list:
-            yield LabeledSentence(words=self._prep_document(doc), tags=[doc])
-
-    def _prep_document(self, doc):
-        """Given a document filename, opens the file and tokenizes it."""
-        full_path = os.path.join(self.DOCS_ABSOLUTE_DIR, doc)
-        with open(full_path, 'r') as doc_contents:
-            return self._tokenize(doc_contents.read())
+        for handle, doc in self.doc_yielder:
+            yield LabeledSentence(words=self._tokenize(doc), tags=[handle])
 
     def _tokenize(self, doc):
         all_tokens = []
@@ -89,70 +93,150 @@ class LabeledLineSentence(object):
         return all_tokens
 
 
+class DocYielder(object):
+    METS_NAMESPACE = {'mets': 'http://www.loc.gov/METS/',
+                      'mods': 'http://www.loc.gov/mods/v3',
+                      'oai': 'http://www.openarchives.org/OAI/2.0/'}
+    DOCS_CACHE = {}
+
+    def get_record(self, dspace_oai_uri, dspace_oai_identifier, identifier,
+                   metadata_format):
+        '''Gets metadata record for a single item in OAI-PMH repository in
+        specified metadata format.
+        '''
+        params = {'verb': 'GetRecord',
+                  'identifier': dspace_oai_identifier + identifier,
+                  'metadataPrefix': metadata_format}
+        r = requests.get(dspace_oai_uri, params=params)
+        return r.text
+
+    def get_record_list(self, dspace_oai_uri, metadata_format, start_date=None,
+                        end_date=None):
+        '''Returns a list of record headers for items in OAI-PMH repository.
+        Must pass in desired metadata format prefix. Can optionally pass
+        bounding dates to limit harvest.
+        '''
+        params = {'verb': 'ListIdentifiers', 'metadataPrefix': metadata_format}
+
+        if start_date:
+            params['from'] = start_date
+        if end_date:
+            params['until'] = end_date
+
+        r = requests.get(dspace_oai_uri, params=params)
+        return r.text
+
+    def parse_record_list(self, record_xml):
+        xml = ET.fromstring(record_xml)
+        records = xml.findall('.//oai:header', self.METS_NAMESPACE)
+        for record in records:
+            handle = record.find('oai:identifier', self.METS_NAMESPACE).text\
+                .replace('oai:dspace.mit.edu:', '').replace('/', '-')
+            identifier = handle.replace('1721.1-', '')
+            setSpecs = record.findall('oai:setSpec', self.METS_NAMESPACE)
+            sets = [s.text for s in setSpecs]
+            yield {'handle': handle, 'identifier': identifier, 'sets': sets}
+
+    def is_thesis(self, item):
+        '''Returns True if any set_spec in given sets is in the
+        thesis_set_spec_list, otherwise returns false.
+        '''
+        try:
+            return self.DOCS_CACHE[item['handle']]['is_thesis']
+        except KeyError:
+            ans = any((s in THESIS_SET_LIST.keys() for s in item['sets']))
+            self.DOCS_CACHE[item['handle']]['is_thesis'] = ans
+            return ans
+
+    def get_pdf_url(self, mets):
+        '''Gets and returns download URL for PDF from METS record.
+        '''
+        record = mets.find('.//mets:file[@MIMETYPE="application/pdf"]/',
+                           self.METS_NAMESPACE)
+
+        url = record.get('{http://www.w3.org/1999/xlink}href')
+        if url:
+            url = url.replace('http://', 'https://')
+
+        return url
+
+    def get_single_network_file(self, item, metadata_format):
+        metadata = self.get_record(DSPACE_OAI_URI, DSPACE_OAI_IDENTIFIER,
+                              item['identifier'], metadata_format)
+        mets = ET.fromstring(metadata)
+        pdf_url = self.get_pdf_url(mets)
+
+        if not pdf_url:
+            return
+
+        with open(item['handle'], 'wb') as f:
+            r = requests.get(pdf_url, stream=True)
+            r.raise_for_status()
+            for chunk in r.iter_content(1024):
+                f.write(chunk)
+            f.flush()
+            self.DOCS_CACHE[item['handle']]['filename'] = f.name
+
+    def extract_text(self, item):
+        if 'textfile' in self.DOCS_CACHE[item['handle']].keys():
+            with open(self.DOCS_CACHE[item['handle']]['textfile'], 'r') as f:
+                return f.read()
+
+        fn = CUR_DIR + '/files/' + self.DOCS_CACHE[item['handle']]['filename']
+        parsed = tikaparser.from_file(fn)
+        content = parsed['content']
+        textfile = fn + '.txt'
+        with open(textfile, 'w') as f:
+            f.write(content)
+
+        self.DOCS_CACHE[item['handle']]['textfile'] = textfile
+
+        return content
+
+    # TODO:
+    # Write files locally so that you don't have to fetch and extract them
+    # each time you do a training epoch. Check for their existence before
+    # grabbing them.
+    # but put an upper bound on the amount of space you're willing to fill with
+    # network files.
+    # Also cache the results of not_a_thesis.
+    def __iter__(self, metadata_format='mets', start_date=None,
+                 end_date=None):
+        items = self.get_record_list(DSPACE_OAI_URI, metadata_format,
+                                     start_date, end_date)
+        parsed_items = self.parse_record_list(items)
+
+        total_items_processed = 0
+
+        for item in parsed_items:
+            if item['handle'] not in self.DOCS_CACHE.keys():
+                self.DOCS_CACHE[item['handle']] = {}
+
+            total_items_processed += 1
+            if not self.is_thesis(item):
+                continue
+
+            print('Processing item %s' % item['handle'])
+            if 'filename' not in self.DOCS_CACHE[item['handle']].keys():
+                self.get_single_network_file(item, metadata_format)
+
+            try:
+                yield (item['handle'], self.extract_text(item))
+            except:
+                print('That failed')
+                continue
+
+            if total_items_processed >= 10:
+                break
+
+
 class ModelTrainer(object):
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DOCS_RELATIVE_DIR = 'documents'
-    DOCS_ABSOLUTE_DIR = os.path.join(BASE_DIR, DOCS_RELATIVE_DIR)
-    KERB = 'm31'
-
     def execute(self, args):
-        if args.kerb:
-            self.KERB = args.kerb
-
-        if args.network:
-            self.get_network_files(args.network)
-
         self.train_model(args.filename)
 
     def get_iterator(self):
-        doc_list = [f for f in os.listdir(self.DOCS_ABSOLUTE_DIR)
-                    if os.path.splitext(f)[-1] == '.txt']
-        return LabeledLineSentence(doc_list, self.DOCS_ABSOLUTE_DIR)
-
-    def get_network_files(self, netdir):
-        """Given a subdirectory name (presumed to be of the repo-dev-1.mit.edu
-        thesis directory), get its .xml and .txt files and deposit them into
-        DOCS_ABSOLUTE_DIR + subdirectory name. Requires that ssh keypair auth
-        be already set up."""
-        if netdir not in THESIS_SUBDIRS:
-            sys.exit('Unrecognized network directory. -n must be in '
-                '{subdirs}'.format(subdirs=THESIS_SUBDIRS))
-
-        working_dir = os.path.join(self.DOCS_ABSOLUTE_DIR, netdir)
-        self.DOCS_ABSOLUTE_DIR = working_dir
-
-        # Make sure directory exists but is empty
-        try:
-            contents = os.listdir(working_dir)
-            if contents:
-                sys.exit("The specified directory is not empty; exiting to "
-                    "avoid overwriting files. If you'd like to write files to "
-                    "this directory, please empty it and rerun the script.")
-        except FileNotFoundError:
-            os.makedirs(working_dir)
-
-        cmd1 = Template("ssh $kerb@repo-dev-1.mit.edu \"find /mnt/tdm/rich/expansions/$netdir/ -name '*-new.txt' -or -name '*.xml' > tempfile.txt\"")  # noqa
-        cmd2 = Template("ssh $kerb@repo-dev-1.mit.edu \"tar -czvf tempfile.tar.gz -T tempfile.txt\"")
-        cmd3 = Template("scp $kerb@repo-dev-1.mit.edu:tempfile.tar.gz $working_dir")  # noqa
-        cmd4 = Template("cd $working_dir ; tar -xzvf tempfile.tar.gz -s '|.*/||'")
-        cmd5 = Template("ssh $kerb@repo-dev-1.mit.edu rm 'tempfile.*'")
-
-        print("Identitying target network files...")
-        subprocess.run(cmd1.substitute(kerb=self.KERB, netdir=netdir),
-                       shell=True)
-
-        print("Making archive...")
-        subprocess.run(cmd2.substitute(kerb=self.KERB), shell=True)
-
-        print("Getting archive...")
-        subprocess.run(cmd3.substitute(kerb=self.KERB,
-                       working_dir=working_dir), shell=True)
-
-        print("Expanding archive...")
-        subprocess.run(cmd4.substitute(working_dir=working_dir), shell=True)
-
-        print("Cleaning up...")
-        subprocess.run(cmd5.substitute(kerb=self.KERB), shell=True)
+        doc_yielder = DocYielder()
+        return LabeledLineSentence(doc_yielder)
 
     def train_model(self, filename):
         model = Doc2Vec(alpha=0.025,
@@ -179,11 +263,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train a neural net on .txt '
         'files located in the documents/ directory.')
     parser.add_argument('filename', help="Base filename of saved model")
-    parser.add_argument('-n', '--network', help="Get files from the specified "
-        "thesis subdirectory of repo-dev-1.mit.edu. Requires that you have "
-        "ssh keypair auth configured.")
-    parser.add_argument('-k', '--kerb', help="Your kerberos ID. Defaults to "
-        "m31.")
 
     args = parser.parse_args()
     ModelTrainer().execute(args)

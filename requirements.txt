@@ -1,0 +1,5 @@
+gensim
+nltk
+requests
+# tika requires Java 7+.
+tika
