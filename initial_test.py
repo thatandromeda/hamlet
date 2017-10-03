@@ -1,4 +1,5 @@
 import argparse
+from glob import glob
 import json
 import logging
 import os
@@ -13,17 +14,13 @@ from tika import parser as tikaparser
 
 from local_settings import DSPACE_OAI_IDENTIFIER, DSPACE_OAI_URI
 
-# Get documents
-# Thoughts...
-# It's 843G of docs. I only have 402 on my machine. So I need to plan on
+# TODO:
+# It's 843G of docs (though this may include pdf and I only need txt).
+# I only have 402 on my machine. So I need to plan on
 # starting with a subset - which I should *anyway* - but I also need to think
 # about what's resident in memory when.
-# Do I need to load the entire corpus into memory to do training or is a
-# stepwise thing happening?
-# For step 1, I should just get a single-department subdirectory and scp it
-# over to my machine. The goal here is to make sure the code runs at all,
-# address tokenization, etc.
-# Next step will involve network file access.
+# Consider scrapping the coroutine - do a first pass where you fetch all the
+# things, cleaning the pdfs, and a second where you list directory contents.
 
 # See https://medium.com/@klintcho/doc2vec-tutorial-using-gensim-ab3ac03d3a1
 
@@ -72,14 +69,19 @@ CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 with open(CUR_DIR + '/thesis_set_list.json', 'r') as f:
     THESIS_SET_LIST = json.loads(f.read())
 
+FILES_DIR = 'files'
+
 
 class LabeledLineSentence(object):
-    def __init__(self, doc_yielder):
-        self.doc_yielder = doc_yielder
+    def __init__(self):
+        doc_list = glob(os.path.join('.', FILES_DIR, '*'))
+        self.doc_list = [doc for doc in doc_list if os.path.isfile(doc)]
 
     def __iter__(self):
-        for handle, doc in self.doc_yielder:
-            yield LabeledSentence(words=self._tokenize(doc), tags=[handle])
+        for filename in self.doc_list:
+            with open(filename, 'r') as f:
+                doc = f.read()
+            yield LabeledSentence(words=self._tokenize(doc), tags=[filename])
 
     def _tokenize(self, doc):
         all_tokens = []
@@ -182,49 +184,41 @@ class DocYielder(object):
             with open(self.DOCS_CACHE[item['handle']]['textfile'], 'r') as f:
                 return f.read()
 
-        fn = CUR_DIR + '/files/' + self.DOCS_CACHE[item['handle']]['filename']
+        fn = self.DOCS_CACHE[item['handle']]['filename']
         parsed = tikaparser.from_file(fn)
         content = parsed['content']
-        textfile = fn + '.txt'
+        textfile = '{}/{}/{}.txt'.format(CUR_DIR, FILES_DIR,
+            self.DOCS_CACHE[item['handle']]['filename'])
         with open(textfile, 'w') as f:
             f.write(content)
 
         self.DOCS_CACHE[item['handle']]['textfile'] = textfile
+        os.remove(fn)
 
         return content
 
-    # TODO:
-    # Write files locally so that you don't have to fetch and extract them
-    # each time you do a training epoch. Check for their existence before
-    # grabbing them.
-    # but put an upper bound on the amount of space you're willing to fill with
-    # network files.
-    # Also cache the results of not_a_thesis.
-    def __iter__(self, metadata_format='mets', start_date=None,
-                 end_date=None):
+    def get_network_files(self, metadata_format='mets', start_date=None,
+                          end_date=None):
+        print('Network files!!!!!!')
         items = self.get_record_list(DSPACE_OAI_URI, metadata_format,
                                      start_date, end_date)
         parsed_items = self.parse_record_list(items)
-
         total_items_processed = 0
 
         for item in parsed_items:
             if item['handle'] not in self.DOCS_CACHE.keys():
                 self.DOCS_CACHE[item['handle']] = {}
 
-            total_items_processed += 1
             if not self.is_thesis(item):
                 continue
+            print('Processing {}'.format(item['handle']))
+
+            total_items_processed += 1
 
             print('Processing item %s' % item['handle'])
-            if 'filename' not in self.DOCS_CACHE[item['handle']].keys():
+            if 'textfile' not in self.DOCS_CACHE[item['handle']].keys():
                 self.get_single_network_file(item, metadata_format)
-
-            try:
-                yield (item['handle'], self.extract_text(item))
-            except:
-                print('That failed')
-                continue
+                self.extract_text(item)
 
             if total_items_processed >= 10:
                 break
@@ -232,36 +226,50 @@ class DocYielder(object):
 
 class ModelTrainer(object):
     def execute(self, args):
+        print('~~~~~~~ getting network files')
+        DocYielder().get_network_files()
+        print('~~~~~~~ training model')
         self.train_model(args.filename)
 
     def get_iterator(self):
-        doc_yielder = DocYielder()
-        return LabeledLineSentence(doc_yielder)
+        return LabeledLineSentence()
 
     def train_model(self, filename):
-        model = Doc2Vec(alpha=0.025,
-                        min_alpha=0.025)
-
         doc_iterator = self.get_iterator()
-        print("Building vocab for %s..." % filename)
-        model.build_vocab(doc_iterator)
 
-        for epoch in range(10):
-            start_time = time.time()
-            print("=== Training epoch {} ===".format(epoch))
-            model.train(doc_iterator,
-                        total_examples=model.corpus_count,
-                        epochs=model.iter)
-            print("Finished training, took {}".format(
-                time.time() - start_time))
+        for window in range(3, 10):
+            for step in range(1, 5):
+                size = step * 50
+                start_time = time.time()
 
-        model.save('{filename}.model'.format(filename=filename))
-        return model
+                print('Training with parameters window={}, '
+                      'size={}'.format(window, size))
+                model = Doc2Vec(alpha=0.025,
+                                # Alpha starts at `alpha` and decreases to
+                                # `min_alpha`
+                                min_alpha=0.025,
+                                # Size of DBOW window (default=5).
+                                window=window,
+                                # Feature vector dimensionality (default=100).
+                                size=size,
+                                # Min word frequency for inclusion (default=5).
+                                min_count=10)
+                print("Building vocab for %s..." % filename)
+                model.build_vocab(doc_iterator)
+
+                model.train(doc_iterator,
+                            total_examples=model.corpus_count,
+                            epochs=model.iter)
+
+                fn = '{}_w{}_s{}'.format(filename, window, size)
+                model.save('{}.model'.format(fn))
+                print('Finished training, took {}'.format(
+                    time.time() - start_time))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train a neural net on .txt '
-        'files located in the documents/ directory.')
+        'files located in the files/ directory.')
     parser.add_argument('filename', help="Base filename of saved model")
 
     args = parser.parse_args()
