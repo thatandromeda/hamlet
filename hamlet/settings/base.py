@@ -33,7 +33,9 @@ DJANGO_APPS = [
     'django.contrib.staticfiles',
 ]
 
-HAMLET_APPS = []
+HAMLET_APPS = [
+    'hamlet.theses',
+]
 
 INSTALLED_APPS = DJANGO_APPS + HAMLET_APPS
 
