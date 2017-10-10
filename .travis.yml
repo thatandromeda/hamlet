@@ -6,6 +6,6 @@ install:
   - "pip install coveralls"
   - "pipenv install"
 script:
-  pipenv coverage run --source=hamlet manage.py test
+  coverage run --source=hamlet manage.py test
 after_success:
   coveralls
