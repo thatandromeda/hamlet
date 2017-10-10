@@ -13,24 +13,18 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
+# -----------------------------------------------------------------------------
+# ------------------------> core django configurations <-----------------------
+# -----------------------------------------------------------------------------
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'f=fqwc&$zt_6rf8y45j1l7w!^e*%a_c)4sf+v*_uf%hwf5_*16'
+# APP CONFIGURATION
+# -----------------------------------------------------------------------------
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
-# Application definition
-
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,6 +32,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+HAMLET_APPS = []
+
+INSTALLED_APPS = DJANGO_APPS + HAMLET_APPS
+
+
+# MIDDLEWARE CONFIGURATION
+# -----------------------------------------------------------------------------
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -49,7 +51,82 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+# DEBUG
+# -----------------------------------------------------------------------------
+
+# Set DJANGO_DEBUG_IS_TRUE to anything on servers if you want DEBUG to be true.
+# Unset if you want DEBUG=False. This makes it easy to flip settings on test
+# servers.
+# SECURITY WARNING: don't run with debug turned on in production!
+
+PROTO_DEBUG = os.environ.get('DJANGO_DEBUG_IS_TRUE', True)
+
+if 'DJANGO_DEBUG_IS_TRUE' in os.environ:
+    DEBUG = True
+else:
+    DEBUG = False
+
+
+# DATABASE CONFIGURATION
+# -----------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+
+# GENERAL CONFIGURATION
+# -----------------------------------------------------------------------------
+
+# SECURITY WARNING: keep the secret key used in production secret!
+# This should only be used for local development.
+SECRET_KEY = 'f=fqwc&$zt_6rf8y45j1l7w!^e*%a_c)4sf+v*_uf%hwf5_*16'
+
+# This is not usable in production. Prod files should list the actually
+# allowed hosts.
+ALLOWED_HOSTS = ['localhost', '0.0.0.0']
+
 ROOT_URLCONF = 'hamlet.urls'
+
+WSGI_APPLICATION = 'hamlet.wsgi.application'
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',  # noqa
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',  # noqa
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',  # noqa
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',  # noqa
+    },
+]
+
+
+# INTERNATIONALIZATION CONFIGURATION
+# -----------------------------------------------------------------------------
+
+LANGUAGE_CODE = 'en-us'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = False
+
+USE_L10N = False
+
+USE_TZ = True
+
+
+# TEMPLATE CONFIGURATION
+# -----------------------------------------------------------------------------
 
 TEMPLATES = [
     {
@@ -67,54 +144,58 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'hamlet.wsgi.application'
+
+# STATIC FILE CONFIGURATION
+# -----------------------------------------------------------------------------
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'hamlet', 'static'),
+)
+
+FIXTURE_DIRS = [os.path.join(BASE_DIR, 'hamlet', 'fixtures')]
 
 
-# Database
-# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
+# LOGGING CONFIGURATION
+# -----------------------------------------------------------------------------
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'formatters': {
+        'brief': {
+            'format': '%(asctime)s %(levelname)s %(name)s[%(funcName)s]: %(message)s',  # noqa
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'hamlet.log'),
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'brief',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file'],
+            'level': 'INFO',
+        }
     }
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
+# -----------------------------------------------------------------------------
+# -----------------> third-party and hamlet configurations <-----------------
+# -----------------------------------------------------------------------------
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/1.11/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
-
-STATIC_URL = '/static/'
+# (None yet)
