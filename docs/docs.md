@@ -2,7 +2,7 @@
 
 ## Systems
 
-Running with pyenv. Will probably port to pipenv.
+Running with pipenv.
 
 tika requires Java, so probably we want to preprocess PDFs off of Heroku.
 

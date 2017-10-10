@@ -3,6 +3,7 @@ from glob import glob
 import json
 import logging
 import os
+import random
 from string import punctuation
 import time
 import xml.etree.ElementTree as ET
@@ -69,12 +70,15 @@ CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 with open(CUR_DIR + '/thesis_set_list.json', 'r') as f:
     THESIS_SET_LIST = json.loads(f.read())
 
+# Where to put the files we train on.
 FILES_DIR = 'files'
+# First is training set; second is test set.
+FILES_SUBDIRS = ['training', 'test']
 
 
 class LabeledLineSentence(object):
     def __init__(self):
-        doc_list = glob(os.path.join('.', FILES_DIR, '*'))
+        doc_list = glob(os.path.join('.', FILES_DIR, FILES_SUBDIRS[0], '*'))
         self.doc_list = [doc for doc in doc_list if os.path.isfile(doc)]
 
     def __iter__(self):
@@ -179,6 +183,15 @@ class DocYielder(object):
             f.flush()
             self.DOCS_CACHE[item['handle']]['filename'] = f.name
 
+    def split_data(self, item):
+        """
+        Randomly assigns to training or test set. Weighted, such that 80%
+        of objects end up in the training set.
+        """
+        set_dir = random.choices(FILES_SUBDIRS, weights=[8, 2])[0]
+        return '{}/{}/{}/{}.txt'.format(CUR_DIR, FILES_DIR, set_dir,
+            self.DOCS_CACHE[item['handle']]['filename'])
+
     def extract_text(self, item):
         if 'textfile' in self.DOCS_CACHE[item['handle']].keys():
             with open(self.DOCS_CACHE[item['handle']]['textfile'], 'r') as f:
@@ -187,8 +200,7 @@ class DocYielder(object):
         fn = self.DOCS_CACHE[item['handle']]['filename']
         parsed = tikaparser.from_file(fn)
         content = parsed['content']
-        textfile = '{}/{}/{}.txt'.format(CUR_DIR, FILES_DIR,
-            self.DOCS_CACHE[item['handle']]['filename'])
+        textfile = self.split_data(item)
         with open(textfile, 'w') as f:
             f.write(content)
 
@@ -220,7 +232,7 @@ class DocYielder(object):
                 self.get_single_network_file(item, metadata_format)
                 self.extract_text(item)
 
-            if total_items_processed >= 10:
+            if total_items_processed >= 50:
                 break
 
 
@@ -262,7 +274,7 @@ class ModelTrainer(object):
                             epochs=model.iter)
 
                 fn = '{}_w{}_s{}'.format(filename, window, size)
-                model.save('{}.model'.format(fn))
+                model.save('models/{}.model'.format(fn))
                 print('Finished training, took {}'.format(
                     time.time() - start_time))
 
