@@ -15,6 +15,7 @@ tika = "*"
 django = {version = "~=1.11"}
 gunicorn = "*"
 gevent = "*"
+coverage = "*"
 
 
 [requires]

@@ -1,0 +1,11 @@
+language: python
+python:
+  - "3.6"
+install:
+  - "pip install -e . --upgrade"
+  - "pipenv install --dev"
+  - "pip install coveralls"
+script:
+  pipenv coverage run --source=hamlet manage.py test
+after_success:
+  coveralls

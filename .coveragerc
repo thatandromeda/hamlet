@@ -1,0 +1,8 @@
+[run]
+branch = True
+omit =
+    */migrations/*
+    */admin.py
+    hamlet/settings/*
+    hamlet/wsgi.py
+source = ./hamlet/
