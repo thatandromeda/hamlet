@@ -1,0 +1,16 @@
+{
+  "name": "hamlet",
+  "scripts": {
+  },
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "hamlet.settings.heroku"
+  },
+  "formation": {
+  },
+  "addons": [
+
+  ],
+  "buildpacks": [
+
+  ]
+}
