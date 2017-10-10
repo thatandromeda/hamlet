@@ -11,7 +11,11 @@ requests = "*"
 tika = "*"
 
 [packages]
+
 django = {version = "~=1.11"}
+gunicorn = "*"
+gevent = "*"
+
 
 [requires]
 python_version = "3.6"
