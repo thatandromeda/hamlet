@@ -1,7 +1,7 @@
 files/
 *.model
 .env
-logs/
+*.log
 
 # Created by https://www.gitignore.io/api/git,osx,python,django,sublimetext
 
