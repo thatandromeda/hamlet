@@ -4,11 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [dev-packages]
-
-gensim = "*"
-nltk = "*"
 requests = "*"
-tika = "*"
+
+
+
+
 
 [packages]
 
@@ -16,6 +16,9 @@ django = {version = "~=1.11"}
 gunicorn = "*"
 gevent = "*"
 coverage = "*"
+gensim = "*"
+nltk = "*"
+tika = "*"
 
 
 [requires]
