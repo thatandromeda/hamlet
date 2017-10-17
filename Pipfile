@@ -21,7 +21,8 @@ gensim = "*"
 nltk = "*"
 tika = "*"
 "psycopg2" = "*"
-
+whitenoise = "*"
+"dj-database-url" = "*"
 
 [requires]
 python_version = "3.6"
