@@ -9,3 +9,5 @@ tika requires Java, so probably we want to preprocess PDFs off of Heroku.
 nltk might require stuff?
 
 gensim wants a C compiler.
+
+Postgres needs a database and user (default values are 'hamlet' for database name and username, no password; override this if desired in .env with DJANGO_DB, DJANGO_DB_USER, DJANGO_DB_PASSWORD)

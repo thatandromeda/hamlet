@@ -9,3 +9,10 @@ script:
   coverage run manage.py test
 after_success:
   coveralls
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+env:
+  - DJANGO_DB=travis_ci_test
+  - DJANGO_DB_USER=postgres
