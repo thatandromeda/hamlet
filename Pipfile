@@ -10,6 +10,7 @@ requests = "*"
 
 
 
+
 [packages]
 
 django = {version = "~=1.11"}
@@ -19,6 +20,7 @@ coverage = "*"
 gensim = "*"
 nltk = "*"
 tika = "*"
+"psycopg2" = "*"
 
 
 [requires]
