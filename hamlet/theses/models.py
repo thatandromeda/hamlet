@@ -101,3 +101,14 @@ class Thesis(models.Model):
     # vocabulary and there's no reason to search for anything other than a
     # complete token (e.g. 'hdl_1721.1_7681').
     sets = ArrayField(models.CharField(max_length=17))
+    identifier = models.IntegerField(unique=True, db_index=True,
+        help_text='The part after the final slash in things '
+            'like http://hdl.handle.net/1721.1/39504')
+
+# What we need for graphing: the amount of relatedness between each Thesis
+# (so like A, B, similarity)
+# Helen will need a function like, given thesis A, what's everything above x
+# similarity? Whatever it
+# She will also need to write some model-level functions to preprocess data for
+# d3.
+# There will be URLs that d3 hits to fetch the data.
