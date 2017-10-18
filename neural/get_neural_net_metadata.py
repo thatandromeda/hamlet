@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import random
+import re
 from string import punctuation
 import time
 import xml.etree.ElementTree as ET
@@ -134,6 +135,9 @@ class DocYielder(object):
             dates = metadata.findall('.//dc:date', self.METS_NAMESPACE)
             # Includes advisor and department.
             contributors = metadata.findall('.//dc:contributor', self.METS_NAMESPACE)
+            identifier = metadata.find('.//dc:identifier', self.METS_NAMESPACE)
+            matcher = r'http[s]?://hdl.handle.net/1721.1/([0-9]*)'
+            short_id = re.match(matcher, identifier).groups()[0]
             print(len(authors), len(dates), len(contributors))
 
             departments = 0
