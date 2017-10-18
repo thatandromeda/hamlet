@@ -933,31 +933,59 @@ img.img-logo {
   margin-bottom: 7px; }
 
 /* line 10, solenoid/static/sass/apps/_solenoid.scss */
-.layout-band-solenoid {
-  background-color: #21759B; }
+.layout-band-hamlet
+ {
+  background-color: #A31F34; } /* mit red */
   /* line 13, solenoid/static/sass/apps/_solenoid.scss */
-  .layout-band-solenoid a.logo {
+  .layout-band-hamlet
+ a.logo {
     color: #fafafa;
     text-decoration: none; }
+  a.logo img {
+    height: 35px;
+    width: 35px;
+    margin-bottom: 8px;}
   /* line 18, solenoid/static/sass/apps/_solenoid.scss */
-  .layout-band-solenoid h1 {
+  .layout-band-hamlet
+ h1 {
     color: #fafafa;
     margin-bottom: 0;
     font-size: 3rem;
     font-weight: 300;
     margin-bottom: -7px; }
   /* line 26, solenoid/static/sass/apps/_solenoid.scss */
-  .layout-band-solenoid .button-secondary, .layout-band-solenoid .button-subtle, .layout-band-solenoid .pagination a, .pagination .layout-band-solenoid a, .layout-band-solenoid .button-danger {
+  .layout-band-hamlet
+ .button-secondary, .layout-band-hamlet
+ .button-subtle, .layout-band-hamlet
+ .pagination a, .pagination .layout-band-hamlet
+ a, .layout-band-hamlet
+ .button-danger {
     margin-top: 8px;
     background-color: #595959;
     color: #fafafa; }
     /* line 31, solenoid/static/sass/apps/_solenoid.scss */
-    .layout-band-solenoid .button-secondary:hover, .layout-band-solenoid .button-subtle:hover, .layout-band-solenoid .pagination a:hover, .pagination .layout-band-solenoid a:hover, .layout-band-solenoid .button-danger:hover, .layout-band-solenoid .button-secondary:focus, .layout-band-solenoid .button-subtle:focus, .layout-band-solenoid .pagination a:focus, .pagination .layout-band-solenoid a:focus, .layout-band-solenoid .button-danger:focus, .layout-band-solenoid .button-secondary.active, .layout-band-solenoid .active.button-subtle, .layout-band-solenoid .pagination a.active, .pagination .layout-band-solenoid a.active, .layout-band-solenoid .active.button-danger {
-      background-color: #21759B;
-      border-color: #21759B;
+    .layout-band-hamlet
+ .button-secondary:hover, .layout-band-hamlet
+ .button-subtle:hover, .layout-band-hamlet
+ .pagination a:hover, .pagination .layout-band-hamlet
+ a:hover, .layout-band-hamlet
+ .button-danger:hover, .layout-band-hamlet
+ .button-secondary:focus, .layout-band-hamlet
+ .button-subtle:focus, .layout-band-hamlet
+ .pagination a:focus, .pagination .layout-band-hamlet
+ a:focus, .layout-band-hamlet
+ .button-danger:focus, .layout-band-hamlet
+ .button-secondary.active, .layout-band-hamlet
+ .active.button-subtle, .layout-band-hamlet
+ .pagination a.active, .pagination .layout-band-hamlet
+ a.active, .layout-band-hamlet
+ .active.button-danger {
+      background-color: #A31F34;
+      border-color: #A31F34;
       border: 1px solid #fafafa; }
   /* line 39, solenoid/static/sass/apps/_solenoid.scss */
-  .layout-band-solenoid .wrap-content {
+  .layout-band-hamlet
+ .wrap-content {
     padding-top: 0;
     padding-bottom: 0; }
 

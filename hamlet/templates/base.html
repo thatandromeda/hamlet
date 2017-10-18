@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <!--[if lte IE 9]><html class="no-js lte-ie9" lang="en"><![endif]-->
 <!--[if !(IE 8) | !(IE 9) ]><!-->
@@ -45,6 +47,20 @@
       </div>
       <!-- end MIT branding -->
 
+      <!-- begin hamlet branding -->
+      <div class="wrap-outer-header layout-band layout-band-hamlet">
+        <div class="wrap-content layout-3q1q">
+          <h1 class="pull-left">
+            <a href="/" class="logo">
+              <img src="{% static "img/ai_logo_white.png" %}" />
+            </a>
+            <span class="h1-text">HAMLET</span>
+            <span class="subtitle">How About Machine Learning Enhancing Theses?</span>
+          </h1>
+        </div>
+      </div>
+      <!-- end hamlet branding -->
+
       <!-- begin main content -->
       <div class="wrap-outer-content layout-band">
         <div class="wrap-content layout-3q1q">
@@ -67,6 +83,8 @@
               <span class="item">Massachusetts Institute of Technology</span>
               <span class="item">77 Massachusetts Avenue</span>
               <span class="item">Cambridge MA 02139-4307</span>
+            </div>
+            <div class="license">Hamlet logo by <a href="https://thenounproject.com/krisztian21/">Krisztián Mátyás</a> used under the <a href="http://creativecommons.org/licenses/by/3.0/" class="license-cc">Creative Commons Attribution License</a>.
             </div>
           </footer><!-- end .footer-info-institute -->
         </div>
