@@ -1,6 +1,5 @@
 import re
 
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 
@@ -97,13 +96,15 @@ class Thesis(models.Model):
     # the expected way. This is the copyright date, NOT the accessioning or
     # availability dates, which may be quite different.
     year = models.IntegerField()
-    # Thesis set is amenable to ArrayField because it's a controlled
-    # vocabulary and there's no reason to search for anything other than a
-    # complete token (e.g. 'hdl_1721.1_7681').
-    sets = ArrayField(models.CharField(max_length=17))
     identifier = models.IntegerField(unique=True, db_index=True,
         help_text='The part after the final slash in things '
             'like http://hdl.handle.net/1721.1/39504')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name_plural = 'theses'
 
 # What we need for graphing: the amount of relatedness between each Thesis
 # (so like A, B, similarity)

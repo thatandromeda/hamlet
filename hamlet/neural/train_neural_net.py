@@ -1,4 +1,3 @@
-import argparse
 from glob import glob
 import json
 import logging
@@ -14,7 +13,7 @@ from nltk import sent_tokenize, WordPunctTokenizer
 import requests
 from tika import parser as tikaparser
 
-from local_settings import DSPACE_OAI_IDENTIFIER, DSPACE_OAI_URI
+from hamlet.theses.models import Thesis
 
 # TODO:
 # It's 843G of docs (though this may include pdf and I only need txt).
@@ -28,53 +27,24 @@ from local_settings import DSPACE_OAI_IDENTIFIER, DSPACE_OAI_URI
 
 logger = logging.getLogger(__name__)
 
-THESIS_SUBDIRS = [
-    'aero_astro',
-    'architecture',
-    'biological_engineering',
-    'biology',
-    'brain_and_cognitive',
-    'chemical_engineering',
-    'chemistry',
-    'civil_and_environmental_engineering',
-    'comp_media_studies',
-    'computational_and_systems_biology',
-    'computation_for_design_and_optimization',
-    'earth_atmo_planetary_sciences',
-    'economics',
-    'eecs',
-    'engineering_systems_division',
-    'harvard_mit_health_sciences_and_technology',
-    'humanities',
-    'institute_data_systems_society',
-    'linguistics_and_philosophy',
-    'materials_science_and_engineering',
-    'mathematics',
-    'mechanical_engineering',
-    'media_arts_and_sciences',
-    'nuclear_engineering',
-    'ocean_engineering',
-    'operations_research_center',
-    'physics',
-    'political_science',
-    'program_in_real_estate_development',
-    'program_writing_humanistic_studies',
-    'science_technology_society',
-    'sloan_school',
-    'systems_design_and_management',
-    'technology_and_policy_program',
-    'urban_studies_and_planning',
-    'various_historical_departments'
-]
-
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 with open(CUR_DIR + '/thesis_set_list.json', 'r') as f:
     THESIS_SET_LIST = json.loads(f.read())
+
+DSPACE_OAI_IDENTIFIER = os.environ.get('DSPACE_OAI_IDENTIFIER')
+DSPACE_OAI_URI = os.environ.get('DSPACE_OAI_URI')
 
 # Where to put the files we train on.
 FILES_DIR = 'files'
 # First is training set; second is test set.
 FILES_SUBDIRS = ['training', 'test']
+
+METS_NAMESPACE = {'mets': 'http://www.loc.gov/METS/',
+                  'mods': 'http://www.loc.gov/mods/v3',
+                  'oai': 'http://www.openarchives.org/OAI/2.0/',
+                  'oai_dc': 'http://www.openarchives.org/OAI/2.0/oai_dc/',
+                  'dc': 'http://purl.org/dc/elements/1.1/',
+                  'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
 
 
 class LabeledLineSentence(object):
@@ -100,15 +70,118 @@ class LabeledLineSentence(object):
         return all_tokens
 
 
-class DocYielder(object):
-    METS_NAMESPACE = {'mets': 'http://www.loc.gov/METS/',
-                      'mods': 'http://www.loc.gov/mods/v3',
-                      'oai': 'http://www.openarchives.org/OAI/2.0/',
-                      'oai_dc': 'http://www.openarchives.org/OAI/2.0/oai_dc/',
-                      'dc': 'http://purl.org/dc/elements/1.1/',
-                      'xsi': 'http://www.w3.org/2001/XMLSchema-instance'}
+class MetadataWriter(object):
+    def extract_contributors(self, metadata):
+        # Includes advisor and department.
+        contributors = metadata.findall('.//dc:contributor', METS_NAMESPACE)
+        advisors = []
+        departments = []
+
+        for contributor in contributors:
+            text = contributor.text
+            if any(['Massachusetts Institute' in text,
+                    'Dept' in text,
+                    'Department' in text]):
+                departments.append(text)
+            else:
+                advisors.append(text)
+        return advisors, departments
+
+    def extract_date(self, metadata):
+        # There will be several (representing copyright, accessioning, etc.)
+        # The copyright date will be a four-digit year. Find the earliest
+        # year (there may be a substantial difference between copyright year
+        # and archival processing years).
+        date_format = r'^[0-9]{4}$'
+        dates = metadata.findall('.//dc:date', METS_NAMESPACE)
+        earliest = 20000
+        for date in dates:
+            if re.match(date_format, date.text):
+                year = int(date.text)
+                if year < earliest:
+                    earliest = year
+        return earliest
+
+    def extract_identifier(self, metadata):
+        identifiers = metadata.findall('.//dc:identifier', METS_NAMESPACE)
+        id_str = None
+        matcher = r'http[s]?://hdl.handle.net/1721.1/([0-9]*)'
+
+        # There may be multiple identifiers; find the first that looks like a
+        # handle.
+        for identifier in identifiers:
+            try:
+                id_str = re.match(matcher, identifier.text).groups()[0]
+                return int(id_str)
+            except AttributeError:
+                continue
+
+    def extract_metadata(self, metadata_dc, metadata_mets):
+        try:
+            dc = ET.fromstring(metadata_dc)
+            mets = ET.fromstring(metadata_mets)
+        except ET.ParseError:
+            return None
+
+        authors = dc.findall('.//dc:creator', METS_NAMESPACE)
+        advisors, departments = self.extract_contributors(dc)
+        date = self.extract_date(dc)
+        id = self.extract_identifier(dc)
+        title = self.extract_title(mets)
+        url = self.extract_url(mets)
+
+        return {'authors': [author.text for author in authors],
+                'advisors': advisors,
+                'date': date,
+                'departments': departments,
+                'id': id,
+                'title': title,
+                'url': url}
+
+    def extract_title(self, mets):
+        title = mets.find('.//mods:title', METS_NAMESPACE)
+        try:
+            return title.text
+        except:
+            return ''
+
+    def extract_url(self, mets):
+        record = mets.find('.//mets:file[@MIMETYPE="application/pdf"]/',
+                           METS_NAMESPACE)
+        url = record.get('{http://www.w3.org/1999/xlink}href')
+        if url:
+            url = url.replace('http://', 'https://')
+
+        return url
+
+    def write(self, metadata_dc, metadata_mets):
+        datadict = self.extract_metadata(metadata_dc, metadata_mets)
+        if not datadict:
+            return False
+        print(datadict)
+        try:
+            Thesis.objects.get(identifier=datadict['id'])
+        except Thesis.DoesNotExist:
+            thesis = Thesis.objects.create(
+                title=datadict['title'],
+                url=datadict['url'],
+                year=datadict['date'],
+                identifier=datadict['id']
+            )
+            print('Created {}'.format(thesis.id))
+            """
+            author = # how to handle multiple
+            advisor = # how to handle multiple
+            department = # how to handle multiple
+            degree = # need to extract; not recorded in an obvious way
+            """
+
+        return True
+
+
+class DocFetcher(object):
     DOCS_CACHE = {}
-    METADATA_CACHE = {'authors': {}, 'departments': {}, 'advisors': {}}
+    WRITER = MetadataWriter()
 
     def extract_text(self, item):
         if 'textfile' in self.DOCS_CACHE[item['handle']].keys():
@@ -126,52 +199,6 @@ class DocYielder(object):
         os.remove(fn)
 
         return content
-
-    def extract_metadata(self, metadata_dc):
-        try:
-            metadata = ET.fromstring(metadata_dc)
-            authors = metadata.findall('.//dc:creator', self.METS_NAMESPACE)
-            # There will be several - filter for the year
-            dates = metadata.findall('.//dc:date', self.METS_NAMESPACE)
-            # Includes advisor and department.
-            contributors = metadata.findall('.//dc:contributor', self.METS_NAMESPACE)
-            identifier = metadata.find('.//dc:identifier', self.METS_NAMESPACE)
-            matcher = r'http[s]?://hdl.handle.net/1721.1/([0-9]*)'
-            short_id = re.match(matcher, identifier).groups()[0]
-            print(len(authors), len(dates), len(contributors))
-
-            departments = 0
-            advisors = 0
-
-            # It may be the case that the subject also contains the department,
-            # such that if the contributor string includes the department string,
-            # it is a department. Oy.
-            for contributor in contributors:
-                text = contributor.text
-                if any(['Massachusetts Institute' in text,
-                        'Dept' in text,
-                        'Department' in text]):
-                    departments += 1
-                else:
-                    advisors += 1
-
-            try:
-                self.METADATA_CACHE['authors'][len(authors)] += 1
-            except KeyError:
-                self.METADATA_CACHE['authors'][len(authors)] = 1
-
-            try:
-                self.METADATA_CACHE['departments'][departments] += 1
-            except KeyError:
-                self.METADATA_CACHE['departments'][departments] = 1
-
-            try:
-                self.METADATA_CACHE['advisors'][advisors] += 1
-            except KeyError:
-                self.METADATA_CACHE['advisors'][advisors] = 1
-
-        except Exception as e:
-            print(e)
 
     def get_network_files(self, args, start_date=None, end_date=None):
         print('Network files!!!!!!')
@@ -192,19 +219,15 @@ class DocYielder(object):
             print('Processing item %s' % item['handle'])
             if 'textfile' not in self.DOCS_CACHE[item['handle']].keys():
                 self.get_single_network_file(item, args)
-                if not args.dryrun:
+                if not args['dryrun']:
                     self.extract_text(item)
-
-            if total_items_processed % 100 == 0:
-                print('Metadata cache time! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-                print(self.METADATA_CACHE)
 
     def get_pdf_url(self, metadata_mets):
         '''Gets and returns download URL for PDF from METS record.
         '''
         mets = ET.fromstring(metadata_mets)
         record = mets.find('.//mets:file[@MIMETYPE="application/pdf"]/',
-                           self.METS_NAMESPACE)
+                           METS_NAMESPACE)
         if not record:
             # There is at least one thesis which has been withdrawn; it has a
             # dspace handle but does not return a document.
@@ -256,10 +279,12 @@ class DocYielder(object):
                                       item['identifier'], 'rdf')
 
         pdf_url = self.get_pdf_url(metadata_mets)
-        if args.write_metadata:
-            self.write_metadata(metadata_dc)
+        if args['write_metadata']:
+            outcome = self.write_metadata(metadata_dc, metadata_mets)
+            if not outcome:
+                return
 
-        if args.dryrun:
+        if args['dryrun']:
             return
 
         if not pdf_url:
@@ -282,18 +307,17 @@ class DocYielder(object):
         except KeyError:
             print(item['sets'])
             ans = any([s in THESIS_SET_LIST.keys() for s in item['sets']])
-            print(ans)
             self.DOCS_CACHE[item['handle']]['is_thesis'] = ans
             return ans
 
     def parse_record_list(self, record_xml):
         xml = ET.fromstring(record_xml)
-        records = xml.findall('.//oai:header', self.METS_NAMESPACE)
+        records = xml.findall('.//oai:header', METS_NAMESPACE)
         for record in records:
-            handle = record.find('oai:identifier', self.METS_NAMESPACE).text\
+            handle = record.find('oai:identifier', METS_NAMESPACE).text\
                 .replace('oai:dspace.mit.edu:', '').replace('/', '-')
             identifier = handle.replace('1721.1-', '')
-            setSpecs = record.findall('oai:setSpec', self.METS_NAMESPACE)
+            setSpecs = record.findall('oai:setSpec', METS_NAMESPACE)
             sets = [s.text for s in setSpecs]
             yield {'handle': handle, 'identifier': identifier, 'sets': sets}
 
@@ -306,19 +330,18 @@ class DocYielder(object):
         return '{}/{}/{}/{}.txt'.format(CUR_DIR, FILES_DIR, set_dir,
             self.DOCS_CACHE[item['handle']]['filename'])
 
-    def write_metadata(self, metadata_dc):
-        self.extract_metadata(metadata_dc)
+    def write_metadata(self, metadata_dc, metadata_mets):
+        return self.WRITER.write(metadata_dc, metadata_mets)
 
 
 class ModelTrainer(object):
     def execute(self, args):
         print('~~~~~~~ getting network files')
-        dy = DocYielder()
-        dy.get_network_files(args)
-        print(dy.METADATA_CACHE)
+        fetcher = DocFetcher()
+        fetcher.get_network_files(args)
         print('~~~~~~~ training model')
-        if not args.dryrun:
-            self.train_model(args.filename)
+        if not args['dryrun']:
+            self.train_model(args['filename'])
 
     def get_iterator(self):
         return LabeledLineSentence()
@@ -351,18 +374,6 @@ class ModelTrainer(object):
                             epochs=model.iter)
 
                 fn = '{}_w{}_s{}'.format(filename, window, size)
-                model.save('models/{}.model'.format(fn))
+                model.save('nets/{}.model'.format(fn))
                 print('Finished training, took {}'.format(
                     time.time() - start_time))
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Train a neural net on .txt '
-        'files located in the files/ directory.')
-    parser.add_argument('filename', help="Base filename of saved model")
-    parser.add_argument('-d', '--dryrun', help="dry run (don't train neural net)",
-                        action='store_true')
-    parser.add_argument('-w', '--write-metadata', help="Write metadata to db",
-                        action='store_true')
-    args = parser.parse_args()
-    ModelTrainer().execute(args)

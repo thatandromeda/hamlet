@@ -7,6 +7,8 @@ DJANGO_SETTINGS_MODULE='hamlet.settings.local' # for using heroku local
 or DJANGO_SETTINGS_MODULE='hamlet.settings.base' # for python manage.py runserver
 DJANGO_DB_PASSWORD='(your password)'
 DJANGO_DEBUG_IS_TRUE='True' (if you want)
+DSPACE_OAI_IDENTIFIER
+DSPACE_OAI_URI
 
 tika requires Java, so probably we want to preprocess PDFs off of Heroku.
 
