@@ -169,9 +169,9 @@ class MetadataWriter(object):
                 identifier=datadict['id']
             )
             print('Created {}'.format(thesis.id))
+            thesis.add_people(datadict['authors'])
+            thesis.add_people(datadict['advisors'], author=False)
             """
-            author = # how to handle multiple
-            advisor = # how to handle multiple
             department = # how to handle multiple
             degree = # need to extract; not recorded in an obvious way
             """

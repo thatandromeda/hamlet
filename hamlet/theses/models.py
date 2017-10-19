@@ -24,7 +24,7 @@ class Person(models.Model):
 
     @staticmethod
     def clean_metadata(namestring):
-        """Extract a list of author names out of raw metadata strings.
+        """Extract a list of personal names out of raw metadata strings.
 
         Breaking apart authors/advisors into separate Person instances is
         better than storing them in an ArrayField because ArrayField only
@@ -56,6 +56,9 @@ class Person(models.Model):
 
         return names
 
+    def __str__(self):
+        return self.name
+
 
 class Department(models.Model):
     # Anticipates things like "Department of Mathematics", not "Course 18".
@@ -86,8 +89,7 @@ class Thesis(models.Model):
     # privileges to set up the database for it, so deploying it to Heroku is a
     # no-go.
     title = models.CharField(max_length=255)
-    author = models.ManyToManyField(Person, related_name='theses_written')
-    advisor = models.ManyToManyField(Person, related_name='theses_advised')
+    contributor = models.ManyToManyField(Person, through='Contribution')
     department = models.ManyToManyField(Department)
     degree = models.CharField(max_length=10)  # SB, M. Eng., etc.
     url = models.URLField()
@@ -103,6 +105,25 @@ class Thesis(models.Model):
     def __str__(self):
         return self.title
 
+    def add_people(self, people, author=True):
+        """Given a list of person name strings, add Person relations."""
+        if author:
+            role = Contribution.AUTHOR
+        else:
+            role = Contribution.ADVISOR
+
+        for person in people:
+            names = Person.clean_metadata(person)
+            for name in names:
+                if not self.contribution_set.filter(person__name=name,
+                                                    role=role):
+                    person, _ = Person.objects.get_or_create(name=name)
+                    Contribution.objects.create(
+                        person=person,
+                        role=role,
+                        thesis=self
+                    )
+
     class Meta:
         verbose_name_plural = 'theses'
 
@@ -113,3 +134,17 @@ class Thesis(models.Model):
 # She will also need to write some model-level functions to preprocess data for
 # d3.
 # There will be URLs that d3 hits to fetch the data.
+
+
+class Contribution(models.Model):
+    AUTHOR = 'author'
+    ADVISOR = 'advisor'
+
+    ROLE_CHOICES = (
+        (AUTHOR, AUTHOR),
+        (ADVISOR, ADVISOR),
+    )
+
+    thesis = models.ForeignKey(Thesis)
+    person = models.ForeignKey(Person)
+    role = models.CharField(max_length=7, choices=ROLE_CHOICES)
