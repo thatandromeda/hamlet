@@ -4,6 +4,7 @@ import logging
 import os
 import random
 import re
+import shutil
 from string import punctuation
 import time
 import xml.etree.ElementTree as ET
@@ -38,8 +39,6 @@ DSPACE_OAI_URI = os.environ.get('DSPACE_OAI_URI')
 
 # Where to put the files we train on.
 FILES_DIR = 'files'
-# First is training set; second is test set.
-FILES_SUBDIRS = ['training', 'test']
 
 METS_NAMESPACE = {'mets': 'http://www.loc.gov/METS/',
                   'mods': 'http://www.loc.gov/mods/v3',
@@ -50,8 +49,8 @@ METS_NAMESPACE = {'mets': 'http://www.loc.gov/METS/',
 
 
 class LabeledLineSentence(object):
-    def __init__(self):
-        doc_list = glob(os.path.join('.', FILES_DIR, FILES_SUBDIRS[0], '*'))
+    def __init__(self, subdir):
+        doc_list = glob(os.path.join('.', FILES_DIR, '*'))
         self.doc_list = [doc for doc in doc_list if os.path.isfile(doc)]
 
     def __iter__(self):
@@ -252,23 +251,6 @@ class DocFetcher(object):
     DOCS_CACHE = {}
     WRITER = MetadataWriter()
 
-    def extract_text(self, item):
-        if 'textfile' in self.DOCS_CACHE[item['handle']].keys():
-            with open(self.DOCS_CACHE[item['handle']]['textfile'], 'r') as f:
-                return f.read()
-
-        fn = self.DOCS_CACHE[item['handle']]['filename']
-        parsed = tikaparser.from_file(fn)
-        content = parsed['content']
-        textfile = self.split_data(item)
-        with open(textfile, 'w') as f:
-            f.write(content)
-
-        self.DOCS_CACHE[item['handle']]['textfile'] = textfile
-        os.remove(fn)
-
-        return content
-
     def get_network_files(self, args, start_date=None, end_date=None):
         print('Network files!!!!!!')
         items = self.get_record_list(DSPACE_OAI_URI, start_date, end_date)
@@ -288,25 +270,6 @@ class DocFetcher(object):
             print('Processing item %s' % item['handle'])
             if 'textfile' not in self.DOCS_CACHE[item['handle']].keys():
                 self.get_single_network_file(item, args)
-                if not args['dryrun']:
-                    self.extract_text(item)
-
-    def get_pdf_url(self, metadata_mets):
-        '''Gets and returns download URL for PDF from METS record.
-        '''
-        mets = ET.fromstring(metadata_mets)
-        record = mets.find('.//mets:file[@MIMETYPE="application/pdf"]/',
-                           METS_NAMESPACE)
-        if not record:
-            # There is at least one thesis which has been withdrawn; it has a
-            # dspace handle but does not return a document.
-            return
-
-        url = record.get('{http://www.w3.org/1999/xlink}href')
-        if url:
-            url = url.replace('http://', 'https://')
-
-        return url
 
     def get_record(self, dspace_oai_uri, dspace_oai_identifier, identifier,
                    metadata_format):
@@ -350,27 +313,12 @@ class DocFetcher(object):
         metadata_dc = self.get_record(DSPACE_OAI_URI, DSPACE_OAI_IDENTIFIER,
                                       item['identifier'], 'rdf')
 
-        pdf_url = self.get_pdf_url(metadata_mets)
         if args['write_metadata']:
             outcome = self.write_metadata(metadata_dc,
                                           metadata_mets,
                                           item['sets'])
             if not outcome:
                 return
-
-        if args['dryrun']:
-            return
-
-        if not pdf_url:
-            return
-
-        with open(item['handle'], 'wb') as f:
-            r = requests.get(pdf_url, stream=True)
-            r.raise_for_status()
-            for chunk in r.iter_content(1024):
-                f.write(chunk)
-            f.flush()
-            self.DOCS_CACHE[item['handle']]['filename'] = f.name
 
     def is_thesis(self, item):
         '''Returns True if any set_spec in given sets is in the
@@ -398,35 +346,101 @@ class DocFetcher(object):
             sets = [s.text for s in setSpecs]
             yield {'handle': handle, 'identifier': identifier, 'sets': sets}
 
-    def split_data(self, item):
-        """
-        Randomly assigns to training or test set. Weighted, such that 80%
-        of objects end up in the training set.
-        """
-        set_dir = random.choices(FILES_SUBDIRS, weights=[8, 2])[0]
-        return '{}/{}/{}/{}.txt'.format(CUR_DIR, FILES_DIR, set_dir,
-            self.DOCS_CACHE[item['handle']]['filename'])
-
     def write_metadata(self, metadata_dc, metadata_mets, item_sets):
         return self.WRITER.write(metadata_dc, metadata_mets, item_sets)
 
 
 class ModelTrainer(object):
-    def execute(self, args):
-        print('~~~~~~~ getting network files')
-        fetcher = DocFetcher()
-        fetcher.get_network_files(args)
-        print('~~~~~~~ training model')
-        if not args['dryrun']:
-            self.train_model(args['filename'])
+    # Accept queryset of Theses as arg
+    # Fetch network data
+    #   Check if it's in a main directory already; if so, ignore
+    #   otherwise, fetch file, extract text, and write to main directory
+    # Split test and training sets
+    #   For all files in our set, cp from main to test or training
+    # Train test model
+    # Train training model
+    MAIN_FILES_DIR = os.path.join(CUR_DIR, FILES_DIR, 'main')
+    # First is training set; second is test set.
+    FILES_SUBDIRS = ['training', 'test']
 
-    def get_iterator(self):
-        return LabeledLineSentence()
+    def get_filename(self, thesis):
+        return '1721.1-{}.txt'.format(thesis.identifier)
 
-    def train_model(self, filename):
-        doc_iterator = self.get_iterator()
-        # TODO make sure to only train on docs which are theses, per extraction
-        # step earlier
+    def fetch_and_write_file(self, thesis, pdf_filepath):
+        with open(pdf_filepath, 'wb') as f:
+            r = requests.get(thesis.url, stream=True)
+            r.raise_for_status()
+            for chunk in r.iter_content(1024):
+                f.write(chunk)
+            f.flush()
+
+    def extract_text(self, thesis):
+        # If we've already extracted this file, let's not do it again.
+        filename = self.get_filename(thesis)
+        if filename in os.listdir(self.MAIN_FILES_DIR):
+            return
+
+        pdf_filepath = os.path.join(self.MAIN_FILES_DIR, 'temp.pdf')
+        filepath = os.path.join(self.MAIN_FILES_DIR, filename)
+        self.fetch_and_write_file(thesis, pdf_filepath)
+
+        parsed = tikaparser.from_file(pdf_filepath)
+        content = parsed['content']
+        with open(filepath, 'w') as f:
+            f.write(content)
+
+        os.remove(pdf_filepath)
+
+        return content
+
+    def split_data(self, queryset):
+        """
+        Randomly assigns to training or test set, by copying the file to the
+        test or training directory. Weighted, such that 80% of objects end up
+        in the training set.
+        """
+        # Clear test/training directories.
+        shutil.rmtree(os.path.join(self.MAIN_FILES_DIR, 'training'))
+        shutil.rmtree(os.path.join(self.MAIN_FILES_DIR, 'test'))
+
+        # Sort theses into test/training directories.
+        for thesis in queryset.objects.all():
+            set_dir = random.choices(self.FILES_SUBDIRS, weights=[8, 2])[0]
+            filename = self.get_filename(thesis)
+            filepath = os.path.join(self.MAIN_FILES_DIR, filename)
+            destination = os.path.join(self.MAIN_FILES_DIR, set_dir)
+            shutil.copy2(filepath, destination)
+
+    def get_iterator(self, subdir):
+        return LabeledLineSentence(subdir)
+
+    def inner_train_model(self, window, size, iterator, filename):
+        model = Doc2Vec(alpha=0.025,
+                        # Alpha starts at `alpha` and decreases to
+                        # `min_alpha`
+                        min_alpha=0.025,
+                        # Size of DBOW window (default=5).
+                        window=window,
+                        # Feature vector dimensionality (default=100).
+                        size=size,
+                        # Min word frequency for inclusion (default=5).
+                        min_count=10)
+
+        print("Building vocab for %s..." % filename)
+        model.build_vocab(iterator)
+
+        print("Training %s..." % filename)
+        model.train(iterator,
+                    total_examples=model.corpus_count,
+                    epochs=model.iter)
+
+        fn = '{}_w{}_s{}'.format(filename, window, size)
+        model.save('nets/{}.model'.format(fn))
+
+    def train_model(self, filename, queryset=Thesis.objects.all()):
+        self.split_data(queryset)
+        training_iterator = self.get_iterator('training')
+        test_iterator = self.get_iterator('test')
 
         for window in range(3, 10):
             for step in range(1, 5):
@@ -435,24 +449,22 @@ class ModelTrainer(object):
 
                 print('Training with parameters window={}, '
                       'size={}'.format(window, size))
-                model = Doc2Vec(alpha=0.025,
-                                # Alpha starts at `alpha` and decreases to
-                                # `min_alpha`
-                                min_alpha=0.025,
-                                # Size of DBOW window (default=5).
-                                window=window,
-                                # Feature vector dimensionality (default=100).
-                                size=size,
-                                # Min word frequency for inclusion (default=5).
-                                min_count=10)
-                print("Building vocab for %s..." % filename)
-                model.build_vocab(doc_iterator)
+                self.inner_train_model(window, size,
+                                       training_iterator,
+                                       '{}_train'.format(filename))
+                self.inner_train_model(window, size,
+                                       test_iterator,
+                                       '{}_test'.format(filename))
 
-                model.train(doc_iterator,
-                            total_examples=model.corpus_count,
-                            epochs=model.iter)
-
-                fn = '{}_w{}_s{}'.format(filename, window, size)
-                model.save('nets/{}.model'.format(fn))
                 print('Finished training, took {}'.format(
                     time.time() - start_time))
+
+
+def write_metadata(args):
+    fetcher = DocFetcher()
+    fetcher.get_network_files(args)
+
+
+def train_model(args):
+    mt = ModelTrainer()
+    mt.train_model(args['filename'], args['queryset'])

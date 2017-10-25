@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from hamlet.neural.train_neural_net import ModelTrainer
+from hamlet.neural.train_neural_net import write_metadata, train_model
 
 
 class Command(BaseCommand):
@@ -16,6 +16,12 @@ class Command(BaseCommand):
                             action='store_true')
 
     def handle(self, *args, **options):
-        mt = ModelTrainer()
-        mt.execute(options)
+        if options['write-metadata']:
+            self.stdout.write(self.style.INFO('Writing metadata'))
+            write_metadata()
+
+        if not options['dryrun']:
+            self.stdout.write(self.style.INFO('Training model'))
+            train_model()
+
         self.stdout.write(self.style.SUCCESS('Done'))
