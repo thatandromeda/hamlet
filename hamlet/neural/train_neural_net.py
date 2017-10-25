@@ -13,6 +13,8 @@ from nltk import sent_tokenize, WordPunctTokenizer
 import requests
 from tika import parser as tikaparser
 
+from django.db.utils import DataError
+
 from hamlet.theses.models import Thesis
 
 # TODO:
@@ -71,6 +73,11 @@ class LabeledLineSentence(object):
 
 
 class MetadataWriter(object):
+    DEGREE_OPTIONS = ["Bachelor's degree",
+                      "Engineer's degree",
+                      "Master's degree",
+                      "Ph.D. / Sc.D."]
+
     def extract_contributors(self, metadata):
         # Includes advisor and department.
         contributors = metadata.findall('.//dc:contributor', METS_NAMESPACE)
@@ -79,6 +86,8 @@ class MetadataWriter(object):
 
         for contributor in contributors:
             text = contributor.text
+            if not text:
+                continue
             if any(['Massachusetts Institute' in text,
                     'Dept' in text,
                     'Department' in text]):
@@ -102,6 +111,48 @@ class MetadataWriter(object):
                     earliest = year
         return earliest
 
+    def extract_degree_from_sets(self, item_sets):
+        """Get degree from thesis set name if possible.
+
+        This is easier than parsing the metadata but doesn't always work, so we
+        try it first and fall back to metadata parsing if needed."""
+        for item_set in item_sets:
+            print(item_set)
+            try:
+                print(THESIS_SET_LIST[item_set])
+                candidate = THESIS_SET_LIST[item_set].split('-')[1].strip()
+                if candidate in self.DEGREE_OPTIONS:
+                    print(candidate)
+                    return candidate
+            except (IndexError, KeyError):
+                # If the set text isn't of the form "Department - Degree",
+                # taking an element from the split() will fail. That's ok.
+                continue
+
+        return None
+
+    def extract_degree(self, metadata, item_sets):
+        if item_sets:
+            degree = self.extract_degree_from_sets(item_sets)
+            if degree:
+                return degree
+
+        try:
+            print('Looking outside of sets')
+            print([e.text for e in
+                   self.mets.findall('.//mods:note', METS_NAMESPACE)])
+            result = [e.text for e in
+                      self.mets.findall('.//mods:note', METS_NAMESPACE) if
+                      e.text is not None and
+                      (e.text.startswith('Thesis') or
+                       e.text.startswith('Massachusetts Institute of '
+                                         'Technology'))]
+        except AttributeError:
+            result = None
+        deg_text = result[0] if result else None
+
+        return Thesis.extract_degree(deg_text) if deg_text else None
+
     def extract_identifier(self, metadata):
         identifiers = metadata.findall('.//dc:identifier', METS_NAMESPACE)
         id_str = None
@@ -116,7 +167,7 @@ class MetadataWriter(object):
             except AttributeError:
                 continue
 
-    def extract_metadata(self, metadata_dc, metadata_mets):
+    def extract_metadata(self, metadata_dc, metadata_mets, item_sets):
         try:
             dc = ET.fromstring(metadata_dc)
             mets = ET.fromstring(metadata_mets)
@@ -126,6 +177,7 @@ class MetadataWriter(object):
         authors = dc.findall('.//dc:creator', METS_NAMESPACE)
         advisors, departments = self.extract_contributors(dc)
         date = self.extract_date(dc)
+        degree = self.extract_degree(mets, item_sets)
         id = self.extract_identifier(dc)
         title = self.extract_title(mets)
         url = self.extract_url(mets)
@@ -133,6 +185,7 @@ class MetadataWriter(object):
         return {'authors': [author.text for author in authors],
                 'advisors': advisors,
                 'date': date,
+                'degree': degree,
                 'departments': departments,
                 'id': id,
                 'title': title,
@@ -148,33 +201,49 @@ class MetadataWriter(object):
     def extract_url(self, mets):
         record = mets.find('.//mets:file[@MIMETYPE="application/pdf"]/',
                            METS_NAMESPACE)
-        url = record.get('{http://www.w3.org/1999/xlink}href')
+
+        # Do this instead of "if not record: return", because record will be
+        # falsy *even when it exists*.
+        try:
+            url = record.get('{http://www.w3.org/1999/xlink}href')
+        except:
+            return None
+
         if url:
             url = url.replace('http://', 'https://')
 
         return url
 
-    def write(self, metadata_dc, metadata_mets):
-        datadict = self.extract_metadata(metadata_dc, metadata_mets)
+    def write(self, metadata_dc, metadata_mets, item_sets):
+        datadict = self.extract_metadata(metadata_dc, metadata_mets, item_sets)
+        print(datadict)
         if not datadict:
             return False
+        # Catch non-thesis objects.
+        required = ['title', 'url', 'date', 'id', 'degree', 'authors',
+                    'advisors', 'departments']
+        if not all([datadict[key] for key in required]):
+            return False
+
         print(datadict)
         try:
             Thesis.objects.get(identifier=datadict['id'])
         except Thesis.DoesNotExist:
-            thesis = Thesis.objects.create(
-                title=datadict['title'],
-                url=datadict['url'],
-                year=datadict['date'],
-                identifier=datadict['id']
-            )
-            print('Created {}'.format(thesis.id))
-            thesis.add_people(datadict['authors'])
-            thesis.add_people(datadict['advisors'], author=False)
-            """
-            department = # how to handle multiple
-            degree = # need to extract; not recorded in an obvious way
-            """
+            try:
+                thesis = Thesis.objects.create(
+                    title=datadict['title'],
+                    url=datadict['url'],
+                    year=datadict['date'],
+                    identifier=datadict['id'],
+                    degree=datadict['degree']
+                )
+                print('Created {}'.format(thesis.id))
+                thesis.add_people(datadict['authors'])
+                thesis.add_people(datadict['advisors'], author=False)
+                thesis.add_departments(datadict['departments'])
+            except DataError as e:
+                print('~~~~~~Failed; identifier was {}'.format(datadict['id']))
+                print(e)
 
         return True
 
@@ -267,6 +336,9 @@ class DocFetcher(object):
         return r.text
 
     def get_single_network_file(self, item, args):
+        if Thesis.objects.filter(identifier=item['identifier']):
+            return
+
         metadata_mets = self.get_record(DSPACE_OAI_URI, DSPACE_OAI_IDENTIFIER,
                                         item['identifier'], 'mets')
 
@@ -280,7 +352,9 @@ class DocFetcher(object):
 
         pdf_url = self.get_pdf_url(metadata_mets)
         if args['write_metadata']:
-            outcome = self.write_metadata(metadata_dc, metadata_mets)
+            outcome = self.write_metadata(metadata_dc,
+                                          metadata_mets,
+                                          item['sets'])
             if not outcome:
                 return
 
@@ -302,11 +376,14 @@ class DocFetcher(object):
         '''Returns True if any set_spec in given sets is in the
         thesis_set_spec_list, otherwise returns false.
         '''
+        # There are some things that are in the Thesis set but aren't really
+        # theses (e.g. they are technical reports). These things will fail when
+        # we try to extract their departments or degrees; we should filter them
+        # out at that point.
         try:
             return self.DOCS_CACHE[item['handle']]['is_thesis']
         except KeyError:
-            print(item['sets'])
-            ans = any([s in THESIS_SET_LIST.keys() for s in item['sets']])
+            ans = any([s in THESIS_SET_LIST.keys()for s in item['sets']])
             self.DOCS_CACHE[item['handle']]['is_thesis'] = ans
             return ans
 
@@ -330,8 +407,8 @@ class DocFetcher(object):
         return '{}/{}/{}/{}.txt'.format(CUR_DIR, FILES_DIR, set_dir,
             self.DOCS_CACHE[item['handle']]['filename'])
 
-    def write_metadata(self, metadata_dc, metadata_mets):
-        return self.WRITER.write(metadata_dc, metadata_mets)
+    def write_metadata(self, metadata_dc, metadata_mets, item_sets):
+        return self.WRITER.write(metadata_dc, metadata_mets, item_sets)
 
 
 class ModelTrainer(object):
@@ -348,6 +425,8 @@ class ModelTrainer(object):
 
     def train_model(self, filename):
         doc_iterator = self.get_iterator()
+        # TODO make sure to only train on docs which are theses, per extraction
+        # step earlier
 
         for window in range(3, 10):
             for step in range(1, 5):

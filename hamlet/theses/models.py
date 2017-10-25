@@ -8,17 +8,25 @@ class Person(models.Model):
     # instance, because we have no way to disambiguate.
     name = models.CharField(max_length=75)
 
+    def __str__(self):
+        return self.name
+
     @staticmethod
     def handle_special_cases(namestring):
         # Fix specific authors with wonky metadata not captured by other rules.
         namestring = namestring.replace('Ren, Xiaoyuan, S.M. (Xiaoyuan Charlene) Massachusetts Institute of Technology',  # noqa
-            'Ren, Xiaoyuan (Xiaoyuan Charlene)'
+                'Ren, Xiaoyuan (Xiaoyuan Charlene)'
             ).replace('Stanford, Joseph, S.M. (Joseph Marsh) Massachusetts Institute of Technology',  # noqa
-            'Stanford, Joseph (Joseph Marsh)'
+                'Stanford, Joseph (Joseph Marsh)'
             ).replace('Wang, Zhiyong, S.M. Massachusetts Institute of Technology. Engineering Systems Division',  # noqa
-            'Wang, Zhiyong'
+                'Wang, Zhiyong'
             ).replace('Williams, Christina M., M.B.A. (Christina Marie). Massachusetts Institute of Technology',  # noqa
-            'Williams, Christina M. (Christina Marie)')
+                'Williams, Christina M. (Christina Marie)'
+            ).replace('Lu, Xin. Ph. D. Massachusetts Institute of Technology. Department of Materials Science and Engineering',  # noqa
+                'Lu, Xin'
+            ).replace('Rodriguez, Miguel A. (Miguel Angel), M.C.P. Massachusetts Institute of Technology',  # noqa
+                'Rodriguez, Miguel A. (Miguel Angel)'
+            )
 
         return namestring
 
@@ -43,7 +51,8 @@ class Person(models.Model):
                    ', Ph. D. Massachusetts Institute of Technology',
                    ', Nav.E. Massachusetts Institute of Technology',
                    ', Nav. E. Massachusetts Institute of Technology',
-                   ', M.B.A. Massachusetts Institute of Technology']
+                   ', M.B.A. Massachusetts Institute of Technology',
+                   ' Massachusetts Institute of Technology']
 
         for deg in degrees:
             names = [name.replace(deg, '') for name in names]
@@ -56,8 +65,8 @@ class Person(models.Model):
 
         return names
 
-    def __str__(self):
-        return self.name
+    class Meta:
+        ordering = ['name']
 
 
 class Department(models.Model):
@@ -70,28 +79,49 @@ class Department(models.Model):
     # for "Course" to be written in, not assume it can be prefixed.
     course = models.CharField(max_length=10, blank=True)
 
+    def __str__(self):
+        return self.name
+
     @staticmethod
     def clean_metadata(deptstring):
         deptstring = deptstring.replace(
-            'Massachusetts Institute of Technology.', '').strip()
+            'Massachusetts Institute of Technology.', ''
+        ).replace(
+            'Dept. of', 'Department of'
+        ).strip().rstrip('.')
+        return deptstring
 
     @staticmethod
-    def create_from_metadata(metadata):
+    def get_or_create_from_metadata(metadata):
+        print(metadata)
         clean = Department.clean_metadata(metadata)
-        if not Department.objects.filter(name=clean):
-            Department.objects.create(name=clean)
+        print(clean)
+        dept, _ = Department.objects.get_or_create(name=clean)
+        return dept
+
+    class Meta:
+        ordering = ['name']
 
 
 class Thesis(models.Model):
+    REPLS = (('E.E', 'Elec.E'), ('Elect.E', 'Elec.E'), ('OceanE', 'Ocean.E'),
+             ('M.ArchAS', 'M.Arch.A.S'), ('PhD', 'Ph.D'), ('ScD', 'Sc.D'))
+
+    DEGREES = ['B.Arch.', 'B.C.P.', 'B.S.', 'C.P.H.', 'Chem.E.', 'Civ.E.',
+               'E.A.A.', 'Elec.E.', 'Env.E.', 'M.Arch.', 'M.Arch.A.S.',
+               'M.B.A.', 'M.C.P.', 'M.Eng.', 'M.Fin.', 'M.S.', 'M.S.V.S.',
+               'Mat.Eng.', 'Nav.Arch.', 'Mech.E.', 'Nav.E.', 'Nucl.E.',
+               'Ocean.E.', 'Ph.D.', 'S.B.', 'S.M.', 'S.M.M.O.T.', 'Sc.D.']
+
     # Max length observed by sampling in the wild is 183; 255 is max length
     # guaranteed to be supported by CharField.
     # It would be great to use CICharField here, but we need superuser
     # privileges to set up the database for it, so deploying it to Heroku is a
     # no-go.
-    title = models.CharField(max_length=255)
+    title = models.TextField()
     contributor = models.ManyToManyField(Person, through='Contribution')
     department = models.ManyToManyField(Department)
-    degree = models.CharField(max_length=10)  # SB, M. Eng., etc.
+    degree = models.CharField(max_length=20)  # SB, M. Eng., etc.
     url = models.URLField()
     # Not DateField, because we only have year, not month or day. Storing as an
     # integer rather than a string should allow for comparisons to happen in
@@ -123,6 +153,30 @@ class Thesis(models.Model):
                         role=role,
                         thesis=self
                     )
+
+    def add_departments(self, departments):
+        for deptstring in departments:
+            dept = Department.get_or_create_from_metadata(deptstring)
+            self.department.add(dept)
+
+    @classmethod
+    def extract_degree(self, degree_statement):
+        """Takes METS format metadata and finds degrees."""
+        result = []
+        try:
+            degree = re.findall('[A-Z][a-z]{,4}\.? ?[A-Z][a-z]{,3}\.?[A-Z]?\.?'
+                                '[A-Z]?\.?[A-Z]?\.?', degree_statement)
+            for item in degree:
+                i = item.replace(' ', '')
+                i = i.rstrip('.')
+                i = reduce(lambda a, kv: a.replace(*kv), self.REPLS, i)
+                if not i.endswith('.'):
+                    i += '.'
+                if i in self.DEGREES:
+                    result.append(i)
+        except TypeError:
+            result = None
+        return result or None
 
     class Meta:
         verbose_name_plural = 'theses'
