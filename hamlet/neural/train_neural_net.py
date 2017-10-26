@@ -14,9 +14,10 @@ from nltk import sent_tokenize, WordPunctTokenizer
 import requests
 from tika import parser as tikaparser
 
+from django.db.models import Count
 from django.db.utils import DataError
 
-from hamlet.theses.models import Thesis
+from hamlet.theses.models import Thesis, Contribution, Person
 
 # TODO:
 # It's 843G of docs (though this may include pdf and I only need txt).
@@ -50,14 +51,15 @@ METS_NAMESPACE = {'mets': 'http://www.loc.gov/METS/',
 
 class LabeledLineSentence(object):
     def __init__(self, subdir):
-        doc_list = glob(os.path.join('.', FILES_DIR, '*'))
+        doc_list = glob(os.path.join(CUR_DIR, FILES_DIR, subdir, '*'))
         self.doc_list = [doc for doc in doc_list if os.path.isfile(doc)]
 
     def __iter__(self):
         for filename in self.doc_list:
             with open(filename, 'r') as f:
                 doc = f.read()
-            yield LabeledSentence(words=self._tokenize(doc), tags=[filename])
+            yield LabeledSentence(words=self._tokenize(doc),
+                                  tags=[os.path.basename(filename)])
 
     def _tokenize(self, doc):
         all_tokens = []
@@ -363,6 +365,14 @@ class ModelTrainer(object):
     # First is training set; second is test set.
     FILES_SUBDIRS = ['training', 'test']
 
+    def reset_directories(self):
+        training_dir = os.path.join(CUR_DIR, FILES_DIR, 'training')
+        test_dir = os.path.join(CUR_DIR, FILES_DIR, 'test')
+        shutil.rmtree(training_dir)
+        shutil.rmtree(test_dir)
+        os.mkdir(training_dir)
+        os.mkdir(test_dir)
+
     def get_filename(self, thesis):
         return '1721.1-{}.txt'.format(thesis.identifier)
 
@@ -400,15 +410,14 @@ class ModelTrainer(object):
         in the training set.
         """
         # Clear test/training directories.
-        shutil.rmtree(os.path.join(self.MAIN_FILES_DIR, 'training'))
-        shutil.rmtree(os.path.join(self.MAIN_FILES_DIR, 'test'))
+        self.reset_directories()
 
         # Sort theses into test/training directories.
-        for thesis in queryset.objects.all():
+        for thesis in queryset:
             set_dir = random.choices(self.FILES_SUBDIRS, weights=[8, 2])[0]
             filename = self.get_filename(thesis)
             filepath = os.path.join(self.MAIN_FILES_DIR, filename)
-            destination = os.path.join(self.MAIN_FILES_DIR, set_dir)
+            destination = os.path.join(CUR_DIR, FILES_DIR, set_dir)
             shutil.copy2(filepath, destination)
 
     def get_iterator(self, subdir):
@@ -434,17 +443,21 @@ class ModelTrainer(object):
                     total_examples=model.corpus_count,
                     epochs=model.iter)
 
-        fn = '{}_w{}_s{}'.format(filename, window, size)
-        model.save('nets/{}.model'.format(fn))
+        fn = '{}_w{}_s{}.model'.format(filename, window, size)
+        filepath = os.path.join(CUR_DIR, 'nets', fn)
+        model.save(filepath)
 
     def train_model(self, filename, queryset=Thesis.objects.all()):
+        for thesis in queryset:
+            self.extract_text(thesis)
+
         self.split_data(queryset)
         training_iterator = self.get_iterator('training')
         test_iterator = self.get_iterator('test')
 
         for window in range(3, 10):
             for step in range(1, 5):
-                size = step * 50
+                size = step * 52  # Multiples of 4 have better performance.
                 start_time = time.time()
 
                 print('Training with parameters window={}, '
@@ -458,6 +471,134 @@ class ModelTrainer(object):
 
                 print('Finished training, took {}'.format(
                     time.time() - start_time))
+
+
+class Evaluator(object):
+    """
+    The Evaluator assumes that, if we have two theses A and B which we expect
+    to be similar, and another C which we expect to be unlike A and B, a
+    good model will place A and B much closer together than A and C or B and C.
+
+    It:
+    * takes a list of models and a queryset they were trained on
+    * selects tuples (A, B, C) of suitable theses within the queryset
+    * sums sim(A, B) - sim(A, C) and sim(A, B) - sim(B, C) for all tuples for
+      the given model
+    * uses that sum as a score
+    * ranks the models according to that score (highest is best)
+
+    To choose tuples:
+    * A, B are chosen such that they share an advisor, and thus we assume they
+      are on similar topics
+    * C is randomly chosen from among theses with a different advisor, and thus
+      on average we expect C to be more different from A and B than they are
+      from one another.
+
+    Note that sim(A, B) - sim(A, C) is expected to be *positive*, because
+    A and B are expected to be similar and A/C are expected to be dissimilar.
+    If C is *more* similar, this similarity calculation number will be
+    negative, which will hurt the model's overall score (as it should).
+    """
+    def __init__(self, model_list, queryset):
+        self.model_list = model_list
+        self.queryset = queryset
+        self.tuples = self.choose_tuples()
+        self.scores = []
+        self.tokenizer = LabeledLineSentence('fake')  # used only for tokenizer
+
+    def choose_tuples(self):
+        """Choose up to 50 tuples we can use to evaluate our net."""
+        tuples = []
+
+        targets = Contribution.objects.filter(role=Contribution.ADVISOR,
+                                              thesis__in=self.queryset)
+        advisors = Person.objects.annotate(
+            num_theses=Count('contribution__thesis')
+        ).filter(
+            contribution__in=targets, num_theses__gte=2
+        ).distinct()
+
+        count = 0
+
+        for advisor in advisors:
+            try:
+                a, b = advisor.thesis_set.intersection(self.queryset)[0:2]
+            except ValueError:
+                # It's possible that, even if an advisor has advised 2 or more
+                # theses, that the theses won't all be in our queryset. (For
+                # example, some advisors supervise theses in multiple
+                # departments.) If we encounter these, just move on to the next
+                # option.
+                continue
+
+            theses = self.queryset.exclude(contribution__person=advisor)
+            num = theses.count()
+            idx = random.randrange(0, num)
+            c = theses[idx]
+            tuples.append((a, b, c))
+            count += 1
+
+            if count == 50:
+                break
+
+        return tuples
+
+    def get_tokens(self, doctag):
+        filename = os.path.join(CUR_DIR, FILES_DIR, 'main', doctag)
+        with open(filename, 'r') as f:
+            doc = f.read()
+
+        return self.tokenizer._tokenize(doc)
+
+    def calculate_score(self, model):
+        score = 0
+
+        for tuple in self.tuples:
+            a_label = '1721.1-{}.txt'.format(tuple[0].identifier)
+            b_label = '1721.1-{}.txt'.format(tuple[1].identifier)
+            c_label = '1721.1-{}.txt'.format(tuple[2].identifier)
+
+            a_tokens = self.get_tokens(a_label)
+            b_tokens = self.get_tokens(b_label)
+            c_tokens = self.get_tokens(c_label)
+
+            # We use similarity_unseen_docs because we can't guarantee that
+            # the document was in the corpus, since train/test split was
+            # random. Hopefully that is mathematically legit.
+            a_to_b = model.docvecs.similarity_unseen_docs(
+                model, a_tokens, b_tokens)
+            a_to_c = model.docvecs.similarity_unseen_docs(
+                model, a_tokens, c_tokens)
+            b_to_c = model.docvecs.similarity_unseen_docs(
+                model, b_tokens, c_tokens)
+
+            subscore = 2 * a_to_b - a_to_c - b_to_c
+
+            score += subscore
+
+        return score
+
+    def score_models(self):
+        for filename in self.model_list:
+            fullpath = os.path.join(CUR_DIR, 'nets', filename)
+            model = Doc2Vec.load(fullpath)
+            score = self.calculate_score(model)
+
+            self.scores.append((filename, score))
+
+        self.scores.sort(key=lambda x: x[1], reverse=True)
+
+    def pretty_print(self):
+        print('       Model  |   Score')
+        print('------------------------------')
+        for scoretuple in self.scores:
+            print('{} |   {}'.format(mytuple[0], mytuple[1]))
+        print('------------------------------')
+        print('🌈 🎉 🦄')
+
+    def evaluate(self):
+        self.score_models()
+        self.pretty_print()
 
 
 def write_metadata(args):
