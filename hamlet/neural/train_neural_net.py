@@ -494,10 +494,40 @@ class Evaluator(object):
       on average we expect C to be more different from A and B than they are
       from one another.
 
-    Note that sim(A, B) - sim(A, C) is expected to be *positive*, because
-    A and B are expected to be similar and A/C are expected to be dissimilar.
-    If C is *more* similar, this similarity calculation number will be
-    negative, which will hurt the model's overall score (as it should).
+    Why the math works:
+    There are 4 basic scenarios.
+
+    sim(A, B) high ; sim(A, C) low
+        This is good! This means similar things are identified as such and
+        there is a large separation between similar and dissimilar objects.
+        The score metric comes out positive.
+
+    sim(A, B) high ; sim(A, C) high
+        This is bad! It means everything is similar to everything, which means
+        the model is meaningless (at least for this example). The score metric
+        comes out near zero.
+
+    sim(A, B) low ; sim(A, C) low
+        Also meaningless; also near zero.
+
+    sim(A, B) low ; sim(A, C) high
+        This is very bad! It means the model thinks similar theses are
+        dissimilar, and vice versa. This is actively misleading. The score
+        metric comes out negative.
+
+    Note that for any individual tuple, there may be low-to-negative results
+    even if the overall model is good. Because we haven't hand-inspected the
+    theses, we don't know for sure that A/B *should* be similar, or that A/C
+    *should* be dissimilar. That's why we use a bunch of tuples - we expect
+    this to work on average.
+
+    Note also that the model was NOT trained on who the advisors are (we could
+    have used this as a label, but did not). This is important because we don't
+    want the metric to be simply measuring how well the model learned known
+    inputs. If we were to tell it about advisors, it would successfully
+    separate theses with different advisors without necessarily learning
+    anything about the semantics of thesis text, and the metric would be
+    uninformative.
     """
     def __init__(self, model_list, queryset):
         self.model_list = model_list
@@ -592,7 +622,7 @@ class Evaluator(object):
         print('       Model  |   Score')
         print('------------------------------')
         for scoretuple in self.scores:
-            print('{} |   {}'.format(mytuple[0], mytuple[1]))
+            print('{} |   {}'.format(scoretuple[0], scoretuple[1]))
         print('------------------------------')
         print('🌈 🎉 🦄')
 
