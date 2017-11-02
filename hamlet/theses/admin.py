@@ -10,7 +10,10 @@ class ContributionInline(admin.TabularInline):
 class ThesisAdmin(admin.ModelAdmin):
     inlines = (ContributionInline,)
     list_filter = ('department', 'degree')
-    search_fields = ('contribution__person__name', 'department__course')
+    search_fields = ('contribution__person__name',
+                     'department__course',
+                     'identifier',
+                     'title')
 
 
 class PersonAdmin(admin.ModelAdmin):

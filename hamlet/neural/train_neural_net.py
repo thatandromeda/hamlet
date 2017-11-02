@@ -19,14 +19,6 @@ from django.db.utils import DataError
 
 from hamlet.theses.models import Thesis, Contribution, Person
 
-# TODO:
-# It's 843G of docs (though this may include pdf and I only need txt).
-# I only have 402 on my machine. So I need to plan on
-# starting with a subset - which I should *anyway* - but I also need to think
-# about what's resident in memory when.
-# Consider scrapping the coroutine - do a first pass where you fetch all the
-# things, cleaning the pdfs, and a second where you list directory contents.
-
 # See https://medium.com/@klintcho/doc2vec-tutorial-using-gensim-ab3ac03d3a1
 
 logger = logging.getLogger(__name__)
@@ -362,10 +354,12 @@ class ModelTrainer(object):
     # Train test model
     # Train training model
     MAIN_FILES_DIR = os.path.join(CUR_DIR, FILES_DIR, 'main')
+    STARTING_FILES = os.listdir(MAIN_FILES_DIR)
     # First is training set; second is test set.
     FILES_SUBDIRS = ['training', 'test']
 
     def reset_directories(self):
+        print('Resetting directories')
         training_dir = os.path.join(CUR_DIR, FILES_DIR, 'training')
         test_dir = os.path.join(CUR_DIR, FILES_DIR, 'test')
         shutil.rmtree(training_dir)
@@ -377,6 +371,7 @@ class ModelTrainer(object):
         return '1721.1-{}.txt'.format(thesis.identifier)
 
     def fetch_and_write_file(self, thesis, pdf_filepath):
+        print('Fetching network file for thesis {}'.format(thesis.identifier))
         with open(pdf_filepath, 'wb') as f:
             r = requests.get(thesis.url, stream=True)
             r.raise_for_status()
@@ -387,21 +382,41 @@ class ModelTrainer(object):
     def extract_text(self, thesis):
         # If we've already extracted this file, let's not do it again.
         filename = self.get_filename(thesis)
-        if filename in os.listdir(self.MAIN_FILES_DIR):
+        if filename in self.STARTING_FILES:
+            print('File already gotten; continuing')
             return
 
         pdf_filepath = os.path.join(self.MAIN_FILES_DIR, 'temp.pdf')
         filepath = os.path.join(self.MAIN_FILES_DIR, filename)
-        self.fetch_and_write_file(thesis, pdf_filepath)
+        try:
+            self.fetch_and_write_file(thesis, pdf_filepath)
+        except:
+            print('~~~~~~WARNING: Download failed for {}'.format(thesis.identifier))
+            return
 
-        parsed = tikaparser.from_file(pdf_filepath)
-        content = parsed['content']
+        print('Extracting pdf text from {}'.format(thesis.identifier))
+        try:
+            parsed = tikaparser.from_file(pdf_filepath)
+        except:
+            thesis.unextractable = True
+            thesis.save()
+            return
+
+        try:
+            content = parsed['content']
+        except KeyError:
+            thesis.unextractable = True
+            thesis.save()
+            return
+
+        if not content:
+            thesis.unextractable = True
+            thesis.save()
+            return
         with open(filepath, 'w') as f:
             f.write(content)
 
         os.remove(pdf_filepath)
-
-        return content
 
     def split_data(self, queryset):
         """
@@ -412,9 +427,16 @@ class ModelTrainer(object):
         # Clear test/training directories.
         self.reset_directories()
 
-        # Sort theses into test/training directories.
+        print('Splitting test and training sets')
+        # Sort theses into test/training directories. Throw out some of them
+        # to save on memory usage during training and file size after -
+        # we'll use the test set metric to gauge whether the trained model
+        # generalizes.
         for thesis in queryset:
-            set_dir = random.choices(self.FILES_SUBDIRS, weights=[8, 2])[0]
+            set_dir = random.choices(self.FILES_SUBDIRS + [None],
+                                     weights=[3, 1, 6])[0]
+            if not set_dir:
+                continue
             filename = self.get_filename(thesis)
             filepath = os.path.join(self.MAIN_FILES_DIR, filename)
             destination = os.path.join(CUR_DIR, FILES_DIR, set_dir)
@@ -448,8 +470,13 @@ class ModelTrainer(object):
         model.save(filepath)
 
     def train_model(self, filename, queryset=Thesis.objects.all()):
+        # Don't bother with theses when we know we can't get text from them.
+        queryset = queryset.filter(unextractable=False)
+        print('About to extract all text')
         for thesis in queryset:
             self.extract_text(thesis)
+
+        print('All text extracted; time to get our ML on')
 
         self.split_data(queryset)
         training_iterator = self.get_iterator('training')
@@ -538,6 +565,7 @@ class Evaluator(object):
 
     def choose_tuples(self):
         """Choose up to 50 tuples we can use to evaluate our net."""
+        print('Choosing tuples')
         tuples = []
 
         targets = Contribution.objects.filter(role=Contribution.ADVISOR,
@@ -581,6 +609,7 @@ class Evaluator(object):
         return self.tokenizer._tokenize(doc)
 
     def calculate_score(self, model):
+        print('Scoring model')
         score = 0
 
         for tuple in self.tuples:
@@ -627,6 +656,7 @@ class Evaluator(object):
         print('🌈 🎉 🦄')
 
     def evaluate(self):
+        print('About to score all models')
         self.score_models()
         self.pretty_print()
 
@@ -637,5 +667,13 @@ def write_metadata(args):
 
 
 def train_model(args):
+    qs = args['queryset']
+    fn = args['filename']
+
     mt = ModelTrainer()
-    mt.train_model(args['filename'], args['queryset'])
+    mt.train_model(fn, qs)
+
+    model_list = os.listdir(os.path.join(CUR_DIR, 'nets'))
+    model_list = [x for x in model_list if x.startswith(fn)]
+    evie = Evaluator(model_list, qs)
+    evie.evaluate()

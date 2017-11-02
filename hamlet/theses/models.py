@@ -1,6 +1,12 @@
 import re
 
+from gensim.models.doc2vec import Doc2Vec
+
+from django.conf import settings
 from django.db import models
+from django.utils.functional import cached_property
+
+NEURAL_NET = Doc2Vec.load(settings.MODEL_FILE)
 
 
 class Person(models.Model):
@@ -131,9 +137,18 @@ class Thesis(models.Model):
     identifier = models.IntegerField(unique=True, db_index=True,
         help_text='The part after the final slash in things '
             'like http://hdl.handle.net/1721.1/39504')
+    unextractable = models.BooleanField(default=False,
+        help_text='Will be set to True if attempts to extract text from '
+            'the pdf failed; such theses are not part of the neural net.')
 
     def __str__(self):
         return self.title
+
+    @cached_property
+    def label(self):
+        return '1721.1-{}.txt'.format(self.identifier)
+
+    # ~~~~~~~~~~~~~~~~~~~~~ Functions for metadata ingest ~~~~~~~~~~~~~~~~~~~~~
 
     def add_people(self, people, author=True):
         """Given a list of person name strings, add Person relations."""
@@ -178,16 +193,37 @@ class Thesis(models.Model):
             result = None
         return result or None
 
+    # ~~~~~~~~~~~~~~~~~ Functions for neural net interactions ~~~~~~~~~~~~~~~~~
+
+    # See https://radimrehurek.com/gensim/models/doc2vec.html for affordances
+    # offered by doc2vec.
+    def get_most_similar(self, threshold=0.75):
+        """Find theses above a given similarity threshold. If there are more
+        than 50, only the 50 most similar will be returned.
+
+        Threshold defaults to 0.75, because in practice that seems to usually
+        result in theses that humans find similar, but also a manageable number
+        of results."""
+        try:
+            friends = NEURAL_NET.docvecs.most_similar(self.label, topn=50)
+        except TypeError:
+            # TypeError will be thrown if the thesis is not in the neural net.
+            return None
+
+        friend_labels = [x[0] for x in friends if x[1] > threshold]
+        friend_ids = [x.split('-')[1].split('.')[0] for x in friend_labels]
+        return Thesis.objects.filter(identifier__in=friend_ids)
+
+    def get_similarity(self, thesis):
+        """Get the similarity between this and another thesis."""
+        try:
+            return NEURAL_NET.docvecs.similarity(self.label, thesis.label)
+        except KeyError:
+            # In case one or both theses were not found in the neural net.
+            return None
+
     class Meta:
         verbose_name_plural = 'theses'
-
-# What we need for graphing: the amount of relatedness between each Thesis
-# (so like A, B, similarity)
-# Helen will need a function like, given thesis A, what's everything above x
-# similarity? Whatever it
-# She will also need to write some model-level functions to preprocess data for
-# d3.
-# There will be URLs that d3 hits to fetch the data.
 
 
 class Contribution(models.Model):
