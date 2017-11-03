@@ -1,0 +1,32 @@
+// ------------------------------
+// Core compile of MIT Libraries styles needed for all apps
+
+// +Base - Utilities
+// ====================
+@import 'global/unsets';
+@import 'global/variables';
+@import 'apps/variables_hamlet';
+@import 'global/helpers';
+
+// +Starter
+// ====================
+@import 'global/base';
+@import 'global/typography';
+@import 'global/layouts'; // various standard layouts
+
+// +Elements
+// ====================
+@import 'elements/content'; // general content styles
+@import 'elements/controls'; // buttons, link styles, sliders, etc.
+@import 'elements/forms';
+@import 'elements/modules';
+@import 'elements/header';
+@import 'elements/footer';
+
+// +Specific Views
+// ====================
+
+// +Utility
+// ====================
+@import 'global/vendor-overrides'; // overrides to vendor-provided styling
+@import 'global/shame';     // used for any bad-form/orphaned scss

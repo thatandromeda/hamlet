@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+echo "-----> Post-compile starting"
+python manage.py migrate
+# Don't use the release phase for compression because it's
+# "Not suggested for asset compilation or other tasks requiring filesystem persistence"
+# per https://devcenter.heroku.com/articles/release-phase .
+python manage.py compress
+python manage.py collectstatic --noinput
+echo "-----> Post-compile done"

@@ -1,0 +1,85 @@
+// general typography helpers
+
+// headers 
+.hd-1 {
+  margin-bottom: .5em;
+  font-size: $fs-xxxlarge;
+  line-height: $lh-tight;
+  font-weight: $fw-bold;
+}
+
+.hd-2 {
+  margin-bottom: .5em;
+  font-size: $fs-xxlarge;  
+  line-height: $lh-tight;
+  font-weight: $fw-bold;
+}
+
+.hd-3 {
+  margin-bottom: .5em;
+  font-size: $fs-xlarge;
+  line-height: $lh-tight;
+  font-weight: $fw-normal;
+}
+
+.hd-4 {
+  margin-bottom: .5em;
+  font-size: $fs-large;
+  line-height: $lh-tight;
+  font-weight: $fw-bold;
+}
+
+.hd-5 {
+  margin-bottom: .5em;
+  font-size: $fs-base;
+  line-height: $lh-tight;
+  font-weight: $fw-bold;
+}
+
+.hd-6 {
+  margin-bottom: .5em;
+  font-size: $fs-base;
+  line-height: $lh-tight;
+  font-weight: $fw-bold;
+}
+
+.hd-subtitle1 {
+  margin-bottom: .5em;
+  font-size: $fs-base; 
+  text-transform: uppercase;
+}
+
+.hd-subtitle2 {
+  margin-bottom: .5em;
+  font-size: $fs-small; 
+  text-transform: uppercase;
+  color: $gray-l1;
+}
+
+.hd-subtitle3 {
+  margin-bottom: .5em;
+  font-size: $fs-xsmall; 
+  text-transform: uppercase;
+  color: $gray-l1;
+}
+
+// copy 
+
+.copy-lead {
+  font-size: $fs-xlarge;
+}
+
+.copy-base {
+  font-size: $fs-base;
+}
+
+.copy-sup {
+  font-size: $fs-xsmall;
+  color: $gray;
+}
+
+.copy-micro {
+  font-size: $fs-xxsmall;  
+  font-weight: $fw-normal;
+  color: $gray;
+}

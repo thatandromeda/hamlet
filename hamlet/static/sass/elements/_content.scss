@@ -1,0 +1,59 @@
+// content-specific styles
+
+.wrap-content {
+
+// unreset base content pieces  
+  h1,
+  .hd-1 {
+    @extend .hd-1;
+  }
+
+  h2,
+  .hd-2 {
+    @extend .hd-2;
+  }
+
+  h3,
+  .hd-3 {
+    @extend .hd-3;
+  }
+
+  h4,
+  .hd-4 {
+    @extend .hd-4;
+  }
+
+  h5,
+  .hd-5 {
+    @extend .hd-5;
+  }
+
+  h6,
+  .hd-6 {
+    @extend .hd-6;
+  } 
+
+  .subtitle {
+    @extend .hd-subtitle1;
+  }
+
+  .subtitle2 {
+    @extend .hd-subtitle2;
+  }
+
+  .subtitle3 {
+    @extend .hd-subtitle3;
+  }
+
+  li {
+    margin-bottom: .5em;
+  }
+
+  // wordpress specific classes
+  .title-page {
+    margin-bottom: 1rem;
+    padding: .5rem 0 1rem 0;
+    font-weight: $fw-bold;
+  }
+}
+

@@ -1,4 +1,5 @@
 {% load static %}
+{% load compress %}
 
 <!DOCTYPE html>
 <!--[if lte IE 9]><html class="no-js lte-ie9" lang="en"><![endif]-->
@@ -20,7 +21,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.1.1/normalize.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic&subset=latin,latin-ext" type="text/css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/static/css/mitlib-style.css" type="text/css" />
+    {% compress css %}
+      <link rel="stylesheet" type="text/x-sass" href='{% static "sass/hamlet.sass" %}'>
+    {% endcompress %}
 
 
   </head>

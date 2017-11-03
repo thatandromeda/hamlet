@@ -1,0 +1,104 @@
+
+// ----------------------------
+// #GRID
+// ----------------------------
+
+// grid - breakpoints
+$bp-screen-sm:                  480px;
+$bp-screen-md:                  768px;
+$bp-screen-lg:                  1024px;
+$bp-screen-xl:                  1280px;
+
+
+// ----------------------------
+// #COLORS
+// ----------------------------
+
+// colors - grayscale
+$black:                         #111;
+$black-t:                       #000; // true black
+$white:                         #fafafa;
+$white-warm:                    #ede8e2;
+$white-t:                       #fff; // true white
+$gray:                          #595959; // accessible on #f3f3f3
+$gray-d1:                       #333;
+$gray-d2:                       #222;
+$gray-l1:                       #767676; // accessible on #fff
+$gray-l2:                       #ccc;
+$gray-l3:                       #dedede;
+$gray-l4:                       #f3f3f3;
+$gray-warm:                     #c6b6a3;
+$transparent:                   rgba(0, 0, 0, 0); // transparent black
+$transparent-w:                 rgba(255,255,255,0); // transparent white
+$glare:                         rgba($white-t, .3);
+$shadow:                        rgba($black-t, .5);
+$smoke:                         rgba($gray, .3);
+$wisp:                          rgba($gray, .1);
+
+// moth colors - named
+$magenta:                       #9c3273;
+$yellow:                        #ffcc33;
+$orange:                        #f58632;
+$barf:                          #cca329;
+$green:                         #43926a;
+$blue:                          #338bc5;
+$blue-bright:                   #0088D0;
+$blue-muted:                    #21759B;
+
+// colors - brand
+$brand-primary:                 $blue;
+$brand-primary-accent:          rgb(14, 166, 236);
+$brand-primary2:                #83c8ff; // accessible on dark 
+$brand-secondary:               $gray-d1;
+$brand-secondary-accent:        rgb(242, 108, 170);
+
+// colors - utilities
+$success:                       $green;
+$warning:                       mix($yellow,$orange,50%);
+$error:                         #AC1D22;
+$informational:                 mix($gray-warm,$black,55%);
+
+
+// ----------------------------
+// #TYPOGRAPHY
+// ----------------------------
+
+$base-font: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$alt-fonts: 'Georgia', Cambria, 'Times New Roman', Times, serif;
+
+// font-sizes and line-heights
+$fs-xxxsmall: .9rem;
+$fs-xxsmall: 1rem;
+$fs-xsmall: 1.2rem;
+$fs-smallish: 1.3rem;
+$fs-small: 1.4rem;
+$fs-base: 1.6rem;
+$fs-large: 1.8rem;
+$fs-xlarge: 2rem;
+$fs-xxlarge: 2.4rem;
+$fs-xxxlarge: 3rem;
+$fs-xxxxlarge: 3.2rem;
+
+$fw-bold: 600;
+$fw-normal: 400;
+$fw-light: 300;
+
+$lh-xtight: 1;
+$lh-tight: 1.3;
+$lh-base: 1.5;
+$lh-loose: 1.7;
+$lh-xloose: 2;
+
+
+// ----------------------------
+// #DEPTH
+// ----------------------------
+
+$z-depth-way-back:      -1000;
+$z-depth-back:           -100;
+$z-depth-lil-back:       -10;
+$z-depth-base:           1;
+$z-depth-lil-front:      10;
+$z-depth-front:          100;
+$z-depth-way-front:     1000;
+

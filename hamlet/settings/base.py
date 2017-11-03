@@ -96,7 +96,7 @@ SECRET_KEY = 'f=fqwc&$zt_6rf8y45j1l7w!^e*%a_c)4sf+v*_uf%hwf5_*16'
 
 # This is not usable in production. Prod files should list the actually
 # allowed hosts.
-ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1', '127.0.0.1:8000']
 
 ROOT_URLCONF = 'hamlet.urls'
 
@@ -210,3 +210,25 @@ LOGGING = {
 # it should not live in neural/nets, where the test models are written. Once
 # you have selected a test model for use, move it to your preferred location.
 MODEL_FILE = os.path.join(PROJECT_DIR, 'neural', 'hamlet.model')
+
+
+# DJANGO-COMPRESSOR CONFIGURATION
+# -----------------------------------------------------------------------------
+
+INSTALLED_APPS += ('compressor',)
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_ENABLED = False
+COMPRESS_OFFLINE = False  # The default, but we're being explicit.
+
+COMPRESS_PRECOMPILERS = (
+    ('text/x-sass', 'django_libsass.SassCompiler'),
+    ('text/x-scss', 'django_libsass.SassCompiler'),
+)
+
+COMPRESS_ROOT = STATIC_ROOT
