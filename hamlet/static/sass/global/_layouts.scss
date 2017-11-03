@@ -1,0 +1,407 @@
+// layouts
+
+// base layout styles for everyone!
+.layout-band {
+  @include clearfix;
+}
+
+.wrap-gridband, 
+.wrap-notice, 
+.wrap-header, 
+.wrap-header-local,
+.wrap-breadcrumb, 
+.wrap-content, 
+.wrap-footer, 
+.wrap-footer-institute {
+  @include clearfix;
+  max-width: 114rem;
+  margin: 0 auto;
+  padding: 10px 4%;
+}
+
+// generic grid options
+
+.gridband {
+  @include clearfix;
+
+  .grid-item {
+    width: auto;
+    float: none;
+  }
+
+  // 2-col generic with overflow
+  &.layout-2c {
+
+    @media (min-width: $bp-screen-md) {
+      .grid-item {
+        float: left;
+        width: 48%;
+        margin-right: 3%;
+        
+        &:nth-child(2n+0) {
+          float: right;
+          margin-right: 0;
+        }
+      }
+    }
+  }
+
+  // 3-col generic with overflow
+  &.layout-3c {
+
+    @media (min-width: $bp-screen-md) {
+      .grid-item {
+        float: left;
+        width: 32%;
+        margin-right: 2%;        
+
+        &:nth-child(3n+3) {
+          float: right;
+          margin-right: 0;
+        }
+      }
+    }
+  }
+
+  // 4-col generic with overflow
+  &.layout-4c {
+
+    @media (min-width: $bp-screen-md) {
+      .grid-item {
+        float: left;
+        width: 23%;
+        margin-right: 2%;        
+
+        &:nth-child(4n+4) {
+          float: right;
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
+
+// ----------------------------
+// #HEADER - global, slim, local
+// ----------------------------
+
+// simplified slim header for light branding
+.wrap-header {
+
+  .header-slim {
+
+    .logo-mit-lib svg {
+      height: 35px;
+    }
+  }
+}
+
+.wrap-header-core, 
+.wrap-header-supp {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.wrap-header-core {
+  width: 65%;
+}
+
+.wrap-header-supp {
+  width: 33%;
+
+  .link-logo-mit {
+    float: right;
+  }
+}
+
+// local header 
+.wrap-header-local {
+
+  .wrap-local-nav {
+    margin-top: 8px;
+
+    a { 
+      display: inline-block;
+      margin-right: 10px;
+      font-size: $fs-small;
+    } 
+  }
+}
+
+// ----------------------------
+// #CONTENT
+// ----------------------------
+
+.wrap-outer-content {
+  background-color: $gray-l4;
+  color: $black;  
+}
+
+.wrap-content { 
+  padding-top: 3rem;
+  padding-bottom: 2%;
+
+  .content-main {
+    padding-bottom: 3rem;
+  }
+}
+
+// 3/4 - 1/4 2-column layout
+.layout-3q1q {
+
+  @media (min-width: $bp-screen-md) {
+
+    .col3q {
+      float: left;
+      width: 73%;
+    }
+
+    .col1q-r {
+      float: right;
+      width: 22%;
+      margin-left: 3%
+    }
+  }
+}
+
+// 1/4 - 3/4 2-column layout
+.layout-1q3q {
+
+  @media (min-width: $bp-screen-md) {
+
+    .col1q {
+      float: left;
+      width: 22%;
+      margin-right: 3%
+    }
+
+    .col3q {
+      float: right;
+      width: 73%;
+    }
+  }
+}
+
+// 1/4 - 1/2 - 1/4 3-column layout
+.layout-1q2q1q {
+
+  @media (min-width: $bp-screen-md) {
+
+    .col1q {
+      float: left;
+      width: 22%;
+      margin-right: 3%
+    }
+
+    .content-main {
+      float: left;
+      width: 48%;
+      margin-right: 3%
+    }
+
+    .col1q-r {
+      float: right;
+      width: 22%;
+    }
+  }
+}
+
+// 1/3 - 2/3 2-column layout
+.layout-1t2t {
+
+  @media (min-width: $bp-screen-md) {
+    display: flex;
+    
+    .col1t {
+      float: left;
+      width: 33%;
+      margin-right: 3%
+    }
+
+    .col2t {
+      float: right;
+      width: 63%;
+    }
+  }
+}
+
+// 2/3 - 1/3 2-column layout
+.layout-2t1t {
+
+  @media (min-width: $bp-screen-md) {
+    display: flex;
+    
+    .col2t {
+      float: left;
+      width: 63%;
+      margin-right: 3%
+    }
+
+    .col1t-r {
+      float: right;
+      width: 33%;
+    }
+  }
+}
+
+ 
+
+// ----------------------------
+// #FOOTER - base and full
+// ----------------------------
+
+.wrap-footer {
+  padding: 3.5rem 4%;
+
+  .wrap-sitemap {
+
+    // hide the sub menu items on small screens
+    .menu-sub {
+      display: none;
+    }
+  }
+
+  .identity {
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+  }
+
+  .wrap-logo-lib {
+    display: inline-block;
+    vertical-align: bottom;
+    margin: 0 20px 20px 0;
+  }
+
+  .wrap-social {
+    display: inline-block;
+    vertical-align: bottom;
+    margin-bottom: 20px;
+  }
+
+  .wrap-usergroups {
+    width: 100%;
+    border-top: 1px solid $gray;
+    padding-top: 2rem;
+
+    span {
+      display: inline-block;
+      margin: 1rem 1.5rem 1rem 0;
+
+      &:after {
+        content:'';
+      }
+    }
+  }
+
+  .wrap-social .text-find-us {
+    display: none;
+  }
+
+  // bigger than small mobile - able to handle columns ok
+  @media (min-width: $bp-screen-md) {
+
+    .wrap-sitemap {
+      display: flex;
+      flex-direction: row;
+
+      .col {
+        margin-right: 3%;
+
+        &:last-child {
+          margin-right: 0;
+        } 
+      }
+
+      .menu-sub {
+        display: block;
+      }
+    }
+
+    .identity {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin: 4% 0 0 0;
+    }
+
+    .wrap-logo-lib, 
+    .wrap-usergroups, 
+    .wrap-social {
+      align-self: flex-end;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .wrap-logo-lib {
+      order: 1;
+      margin-right: 4%;
+    }
+
+    .wrap-usergroups {
+      order: 3;
+      width: 100%;
+      margin: 1rem 4% 0 0;
+      border-top: none;
+
+      span {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    .wrap-social {
+      order: 2;
+      margin-left: 4%;
+    }
+  }
+
+  // large screen - able to handle several inline items
+  @media (min-width: $bp-screen-lg) {
+
+    .wrap-usergroups {
+      order: 2;
+      width: auto;
+    }
+
+    .wrap-social {
+      order: 3;
+    }
+  }
+}
+
+// footer - adjustments for slim
+.wrap-footer.footer-slim {
+  padding: 1.5rem 4%;
+
+  .footer-main {
+    display: flex;
+    align-items: center;
+  }
+
+  .wrap-sitemap {
+    margin-left: 2%;
+
+    .item {
+      display: block;
+      margin-right: 10px;
+    }
+  }
+
+  // larger screen - able to handle several inline items
+  @media (min-width: $bp-screen-md) {
+
+    .footer-main {
+      align-items: baseline;
+    }
+
+    .wrap-sitemap .item {
+      display: inline-block;
+    }
+  }
+}
+
+// mit institute footer
+.wrap-footer-institute {
+  padding: 20px 4%;
+}
+

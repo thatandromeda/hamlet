@@ -1,0 +1,154 @@
+// mixins and extends for simple stuff that gets reused a lot
+
+.sr {
+  border: 0 none;
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  word-wrap: normal;
+}
+
+@mixin sr-focusable {
+  &:focus {
+    position: static;
+    display: block;
+    height: auto;
+    width: auto; 
+  }
+}
+
+// flexbox wrapper
+.wrap-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+  
+@mixin clearfix {
+  &:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+%unbutton {
+  @extend %link;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 0;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+// remove spacing from first/last children
+%clear-first-child {
+  &:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+}
+
+%clear-last-child {
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+%text-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// lists
+%reset-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-indent: 0;
+
+  li,
+  dt,
+  dd {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.list-unbulleted {
+  list-style: none;
+  padding-left: 0;
+  text-indent: 0;
+}
+
+.list-inline {
+  @extend %reset-list;
+
+  li,
+  dt,
+  dd {
+    display: inline-block;
+  }
+}
+
+.list-inline-pipe {
+  padding-left: 0;
+
+  li, 
+  .item {
+    display: inline-block;
+    padding-right: 1rem;
+
+    &:after {
+      content: ' | ';
+      margin-left: 1rem;
+    }
+    
+    &:last-child:after {
+      content: '';
+    }
+  }
+}
+
+.is-hidden {
+  display: none;
+}
+
+
+%link {
+  transition: color .25s ease-in-out 0s;
+  color: $brand-primary;
+  text-decoration: none;
+
+  // STATE: hover, active, focus
+  &:hover,
+  &:active,
+  &:focus {
+      color: $brand-primary-accent;
+      text-decoration: underline;
+  }
+
+  // STATE: is disabled
+  &:disabled,
+  &.is-disabled {
+      display: none;
+      color: $gray;
+  }
+
+  // STATE: is pressed or active
+  &:active,
+  &.is-pressed,
+  &.is-active {
+      color: $brand-primary-accent;
+  }
+}
+
+
