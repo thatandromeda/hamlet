@@ -96,7 +96,7 @@ SECRET_KEY = 'f=fqwc&$zt_6rf8y45j1l7w!^e*%a_c)4sf+v*_uf%hwf5_*16'
 
 # This is not usable in production. Prod files should list the actually
 # allowed hosts.
-ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1', '127.0.0.1:8000']
 
 ROOT_URLCONF = 'hamlet.urls'
 

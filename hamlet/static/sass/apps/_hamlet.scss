@@ -1,0 +1,40 @@
+.layout-band-hamlet {
+  background-color: $brand-primary;
+
+  a.logo {
+    color: $white;
+    text-decoration: none;
+
+    img {
+      height: 35px;
+      width: 35px;
+      margin-bottom: 8px;
+    }
+  }
+
+  h1 {
+    color: $white;
+    margin-bottom: 0;
+    font-size: $fs-xxxlarge;
+    font-weight: $fw-light;
+    margin-bottom: -7px;
+  }
+
+  .button-secondary {
+    margin-top: 8px;
+    background-color: $gray;
+    color: $white;
+
+    &:hover,
+    &:focus {
+      background-color: $brand-primary;
+      border-color: $brand-primary;
+      border: 1px solid $white;
+    }
+  }
+
+  .wrap-content {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}

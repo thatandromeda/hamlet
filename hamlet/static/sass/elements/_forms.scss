@@ -1,0 +1,151 @@
+// base form styles
+
+form {
+  margin: 1.5rem 0;
+
+  fieldset {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid $gray-l2;
+    padding: 1rem 1.5rem;
+  }
+
+  legend {
+    padding: 0 1rem;
+    font-size: $fs-small;
+    color: $gray;
+    text-transform: uppercase;
+  }
+
+  .field-wrap, 
+  .field-group {
+    margin-bottom: 1rem;
+  }
+  
+  .field-label {
+    display: inline-block;
+    margin-bottom: .2rem;
+    font-size: $fs-small;
+    font-weight: $fw-bold;
+  }
+
+  .field {
+    display: block;
+    margin-top: .2rem;
+    margin-bottom: .2rem;
+    border: 1px solid $gray-l2;
+    border-radius: 2px;
+    background-image: none;
+
+    &:focus, &:active {
+      border-color: $brand-primary;
+      box-shadow: 0 0 5px rgba($brand-primary-accent,.8);
+    }
+
+    &.wide {
+      width: 90%;
+    }
+  }
+
+  .field-text {
+    min-width: 25rem;
+    padding: 6px 12px;
+    background-color: $white-t;
+    box-shadow: inset 0 0 3px rgba(0,0,0,.2);
+  }
+
+  .tip, 
+  .hint {
+    font-size: $fs-small;
+    color: $informational;
+    margin-bottom: 0;
+
+    &.error {
+      color: $error;
+    }
+  }
+
+  .field-textarea {
+    display: block;
+    min-width: 25rem;
+  }
+
+  .field-select {
+    display: block;
+    min-width: 25rem;
+    padding: 3px;
+  }
+
+  .field-upload {
+    border: none;
+  }
+
+  .group-inline {
+    margin-bottom: 1rem;
+
+    .field-wrap {
+      display: inline-block;
+      margin-bottom: .2rem;
+    }    
+
+    .field-select {
+      min-width: auto;
+    }
+  }
+
+ .fields-inline {
+  
+    .field-label {
+      display: inline-block;
+      max-width: 30%;
+    }
+
+    .field {
+      display: inline-block;
+      max-width: 65%;
+    }
+
+    &.field-radio {
+      display: inline-block;
+      margin-right: 1.5rem;
+    }
+  }
+
+  .disabled {
+    color: $gray;
+    cursor: not-allowed;
+  }
+
+// CASE: form/field error - error class should go on field-wrap
+  .error {
+
+    .field-label {
+      color: $error;
+    }
+
+    .field {
+      border-color: $error;
+    }
+
+    .tip, 
+    .hint {
+      color: $error;
+    }
+
+  }
+
+}
+
+// simple input - button type form
+.form-horizontal {
+  .form-input {
+    display: inline-block;
+    width: 80%;
+  }
+
+  .form-action {
+    display: inline-block;
+    width: 18%;
+  }
+}
+

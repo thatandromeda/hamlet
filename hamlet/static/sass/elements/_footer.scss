@@ -1,0 +1,112 @@
+// footer styles
+
+.wrap-outer-footer {
+  background-color: $gray-d1;
+  color: $white;
+  font-size: $fs-xsmall;
+}
+
+.wrap-footer {
+
+  a {
+    @extend %link;
+    color: $gray-l2;
+  }
+
+  .title {
+    @extend .hd-6;
+    margin-bottom: .8rem;
+  }
+
+  .wrap-list .link-sub {
+    display: list-item;
+    list-style-type: none;
+    margin-bottom: .65rem;
+    font-weight: $fw-light;
+  }
+
+  .logo-mit-lib {
+    fill: $white;
+
+    svg {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+    }
+  }
+
+  .wrap-usergroups {
+    @extend .list-inline-pipe;
+    font-size: $fs-small;
+  }
+
+  .wrap-social {
+
+    p, a {
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: .5rem;
+      margin-bottom: 0;
+      text-transform: uppercase;
+      font-size: $fs-xsmall;
+    }
+
+    svg {
+      height: 2em;
+      width: 2em;
+      border-radius: 50%;
+      padding: 0.2em;
+      background: $gray-l2 none repeat scroll 0 0;
+
+      path {
+        fill: $gray-d1;      
+      }
+    }
+  }
+}
+
+// footer - adjustments for slim
+.wrap-footer.footer-slim {
+
+  .sitemap-libraries-abbrev a {
+    @extend .list-inline-pipe;
+    font-size: $fs-small;
+  }
+
+}
+
+// MIT footer
+.wrap-outer-footer-institute {
+  background-color: $gray;
+  font-size: $fs-xxsmall;
+  color: $gray-l1;
+
+  a {
+    @extend %link;
+    color: $white;
+  }
+
+  .link-logo-mit {
+    display: inline-block;
+
+    .logo-mit {
+      fill: $gray-l1;
+
+      .color {
+        fill: $white;
+      }
+    }
+  }
+
+  .about-mit {
+    @extend .list-inline-pipe;
+    display: inline-block;
+    color: $gray-l2;
+    text-transform: uppercase;
+  }
+
+  .license {
+    margin-top: 1rem;
+    color: $gray-l2;
+  }
+}
