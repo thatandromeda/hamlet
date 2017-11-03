@@ -17,3 +17,15 @@ nltk might require stuff?
 gensim wants a C compiler.
 
 Postgres needs a database and user (default values are 'hamlet' for database name and username, no password; override this if desired in .env with DJANGO_DB, DJANGO_DB_USER, DJANGO_DB_PASSWORD)
+
+## Static assets
+If you need to edit styles, edit files in `hamlet/static/sass/apps/`. Don't edit css directly - these changes will be blown away during asset precompilation.
+
+### for `python manage.py runserver`
+* run `python manage.py collectstatic`
+* use `hamlet.settings.base`
+
+### for `heroku local`
+* run `python manage.py compress`
+* then run `python manage.py collectstatic`
+* use `hamlet.settings.local`
