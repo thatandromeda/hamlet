@@ -11,6 +11,8 @@ requests = "*"
 
 
 
+
+
 [packages]
 
 django = {version = "~=1.11"}
@@ -23,6 +25,8 @@ tika = "*"
 "psycopg2" = "*"
 whitenoise = "*"
 "dj-database-url" = "*"
+"django-compressor" = "*"
+"django-libsass" = "*"
 
 [requires]
 python_version = "3.6"

@@ -210,3 +210,25 @@ LOGGING = {
 # it should not live in neural/nets, where the test models are written. Once
 # you have selected a test model for use, move it to your preferred location.
 MODEL_FILE = os.path.join(PROJECT_DIR, 'neural', 'hamlet.model')
+
+
+# DJANGO-COMPRESSOR CONFIGURATION
+# -----------------------------------------------------------------------------
+
+INSTALLED_APPS += ('compressor',)
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_ENABLED = False
+COMPRESS_OFFLINE = False  # The default, but we're being explicit.
+
+COMPRESS_PRECOMPILERS = (
+    ('text/x-sass', 'django_libsass.SassCompiler'),
+    ('text/x-scss', 'django_libsass.SassCompiler'),
+)
+
+COMPRESS_ROOT = STATIC_ROOT
