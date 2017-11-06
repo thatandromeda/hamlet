@@ -110,12 +110,9 @@ class MetadataWriter(object):
         This is easier than parsing the metadata but doesn't always work, so we
         try it first and fall back to metadata parsing if needed."""
         for item_set in item_sets:
-            print(item_set)
             try:
-                print(THESIS_SET_LIST[item_set])
                 candidate = THESIS_SET_LIST[item_set].split('-')[1].strip()
                 if candidate in self.DEGREE_OPTIONS:
-                    print(candidate)
                     return candidate
             except (IndexError, KeyError):
                 # If the set text isn't of the form "Department - Degree",
@@ -131,9 +128,6 @@ class MetadataWriter(object):
                 return degree
 
         try:
-            print('Looking outside of sets')
-            print([e.text for e in
-                   self.mets.findall('.//mods:note', METS_NAMESPACE)])
             result = [e.text for e in
                       self.mets.findall('.//mods:note', METS_NAMESPACE) if
                       e.text is not None and
@@ -209,7 +203,6 @@ class MetadataWriter(object):
 
     def write(self, metadata_dc, metadata_mets, item_sets):
         datadict = self.extract_metadata(metadata_dc, metadata_mets, item_sets)
-        print(datadict)
         if not datadict:
             return False
         # Catch non-thesis objects.
@@ -218,7 +211,6 @@ class MetadataWriter(object):
         if not all([datadict[key] for key in required]):
             return False
 
-        print(datadict)
         try:
             Thesis.objects.get(identifier=datadict['id'])
         except Thesis.DoesNotExist:
@@ -556,12 +548,29 @@ class Evaluator(object):
     anything about the semantics of thesis text, and the metric would be
     uninformative.
     """
-    def __init__(self, model_list, queryset):
+    def __init__(self, model_list):
         self.model_list = model_list
-        self.queryset = queryset
+        self.queryset = self.get_queryset()
         self.tuples = self.choose_tuples()
         self.scores = []
         self.tokenizer = LabeledLineSentence('fake')  # used only for tokenizer
+
+    def get_queryset(self):
+        """
+        The queryset for the evaluator is the set of files that the neural net
+        was *trained* on.
+
+        It's important to restrict ourselves to these, and not to the entire
+        universe of theses, because we only get meaningful data from the test
+        set about whether the parameters have generalized well if we are
+        looking at its performance on training set data.
+        """
+        matcher = '1721.1-(\d+).txt'
+        training_dir = os.path.join(CUR_DIR, FILES_DIR, 'training')
+        training_files = os.listdir(training_dir)
+        training_ids = [re.match(matcher, filename).groups()[0]
+                        for filename in training_files]
+        return Thesis.objects.filter(identifier__in=training_ids)
 
     def choose_tuples(self):
         """Choose up to 50 tuples we can use to evaluate our net."""
@@ -590,9 +599,7 @@ class Evaluator(object):
                 continue
 
             theses = self.queryset.exclude(contribution__person=advisor)
-            num = theses.count()
-            idx = random.randrange(0, num)
-            c = theses[idx]
+            c = self.get_random_outsider_thesis(theses)
             tuples.append((a, b, c))
             count += 1
 
@@ -601,6 +608,20 @@ class Evaluator(object):
 
         return tuples
 
+    def get_random_outsider_thesis(self, theses):
+        num = theses.count()
+        while True:
+            idx = random.randrange(0, num)
+            filename = os.path.join(CUR_DIR, FILES_DIR, 'main',
+                                    '1721.1-{}.txt'.format(idx))
+            if os.path.isfile(filename):
+                c = theses[idx]
+                break
+        return c
+
+    def get_filename_from_identifier(self, identifier):
+        return
+
     def get_tokens(self, doctag):
         filename = os.path.join(CUR_DIR, FILES_DIR, 'main', doctag)
         with open(filename, 'r') as f:
@@ -608,7 +629,24 @@ class Evaluator(object):
 
         return self.tokenizer._tokenize(doc)
 
-    def calculate_score(self, model):
+    def trained_similarities(self, model, a_label, b_label, c_label):
+        a_to_b = model.docvecs.similarity(a_label, b_label)
+        a_to_c = model.docvecs.similarity(a_label, c_label)
+        b_to_c = model.docvecs.similarity(b_label, c_label)
+
+        return a_to_b, a_to_c, b_to_c
+
+    def untrained_similarities(self, model, a_tokens, b_tokens, c_tokens):
+        a_to_b = model.docvecs.similarity_unseen_docs(
+            model, a_tokens, b_tokens)
+        a_to_c = model.docvecs.similarity_unseen_docs(
+            model, a_tokens, c_tokens)
+        b_to_c = model.docvecs.similarity_unseen_docs(
+            model, b_tokens, c_tokens)
+
+        return a_to_b, a_to_c, b_to_c
+
+    def calculate_score(self, model, training):
         print('Scoring model')
         score = 0
 
@@ -621,15 +659,19 @@ class Evaluator(object):
             b_tokens = self.get_tokens(b_label)
             c_tokens = self.get_tokens(c_label)
 
-            # We use similarity_unseen_docs because we can't guarantee that
-            # the document was in the corpus, since train/test split was
-            # random. Hopefully that is mathematically legit.
-            a_to_b = model.docvecs.similarity_unseen_docs(
-                model, a_tokens, b_tokens)
-            a_to_c = model.docvecs.similarity_unseen_docs(
-                model, a_tokens, c_tokens)
-            b_to_c = model.docvecs.similarity_unseen_docs(
-                model, b_tokens, c_tokens)
+            # If the documents are in the trained set, use the doc2vec
+            # similarity() function. We don't want to use
+            # similarity_unseen_docs for both test and training, because it
+            # needs to use infer_vector, and the results of that are somewhat
+            # unpredictable. In particular, the test data may score *better*
+            # than the training data. The vector calculated during training is
+            # more accurate and we should use it where available.
+            if training:
+                a_to_b, a_to_c, b_to_c = self.trained_similarities(
+                    model, a_label, b_label, c_label)
+            else:
+                a_to_b, a_to_c, b_to_c = self.untrained_similarities(
+                    model, a_tokens, b_tokens, c_tokens)
 
             subscore = 2 * a_to_b - a_to_c - b_to_c
 
@@ -641,7 +683,8 @@ class Evaluator(object):
         for filename in self.model_list:
             fullpath = os.path.join(CUR_DIR, 'nets', filename)
             model = Doc2Vec.load(fullpath)
-            score = self.calculate_score(model)
+            training = 'training' in fullpath
+            score = self.calculate_score(model, training)
 
             self.scores.append((filename, score))
 
@@ -674,6 +717,7 @@ def train_model(args):
     mt.train_model(fn, qs)
 
     model_list = os.listdir(os.path.join(CUR_DIR, 'nets'))
-    model_list = [x for x in model_list if x.startswith(fn)]
-    evie = Evaluator(model_list, qs)
+    model_list = [x for x in model_list
+                  if x.startswith(fn) and x.endswith('.model')]
+    evie = Evaluator(model_list)
     evie.evaluate()

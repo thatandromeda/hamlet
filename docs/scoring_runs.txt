@@ -1,0 +1,128 @@
+[[ First scoring run. Clear favorite, but test outscoring training is weird.
+   Gotta figure out what's happening here. ]]
+Scoring model
+       Model  |   Score
+------------------------------
+all_theses_test_w5_s52.model |   39.07172489805552
+all_theses_train_w5_s52.model |   37.78573302799929
+all_theses_test_w4_s52.model |   37.50131040759342
+all_theses_test_w3_s52.model |   37.48469545815374
+all_theses_train_w3_s52.model |   37.1312437081091
+all_theses_test_w7_s52.model |   36.23026319545022
+all_theses_train_w4_s52.model |   36.16967059163768
+all_theses_test_w8_s52.model |   36.01083218480248
+all_theses_test_w6_s52.model |   35.98308366783362
+all_theses_test_w9_s52.model |   34.97904834268687
+all_theses_train_w9_s52.model |   34.62210748762586
+all_theses_train_w8_s52.model |   34.523360647411145
+all_theses_train_w6_s52.model |   34.12526002391163
+all_theses_train_w7_s52.model |   33.858883235639695
+all_theses_test_w3_s104.model |   33.105293178321304
+all_theses_test_w5_s104.model |   32.42780972078475
+all_theses_test_w4_s104.model |   32.256988699057764
+all_theses_test_w6_s104.model |   31.683179262145078
+all_theses_train_w5_s104.model |   31.312261355266408
+all_theses_train_w3_s104.model |   30.712900419075883
+all_theses_train_w4_s104.model |   30.09029366644067
+all_theses_test_w4_s156.model |   29.44700618894475
+all_theses_train_w3_s156.model |   29.435468931782765
+all_theses_test_w5_s156.model |   29.4142603866862
+all_theses_test_w8_s104.model |   29.354771645826297
+all_theses_test_w7_s104.model |   28.9309023183371
+all_theses_test_w9_s104.model |   28.592132038553917
+all_theses_train_w7_s104.model |   28.43607547694262
+all_theses_train_w6_s104.model |   28.418893982086555
+all_theses_test_w8_s156.model |   28.061805294131876
+all_theses_test_w6_s156.model |   28.032141807576693
+all_theses_test_w3_s156.model |   27.905505606618153
+all_theses_train_w9_s104.model |   27.585741970882587
+all_theses_train_w8_s104.model |   27.01046127457653
+all_theses_train_w6_s156.model |   26.944515281205987
+all_theses_train_w4_s156.model |   26.831575399599544
+all_theses_test_w4_s208.model |   26.58677032366246
+all_theses_test_w5_s208.model |   26.21344028036843
+all_theses_test_w9_s156.model |   26.087453065271703
+all_theses_test_w6_s208.model |   25.943993044372085
+all_theses_train_w5_s156.model |   25.84169621310039
+all_theses_test_w9_s208.model |   25.471536063159313
+all_theses_train_w3_s208.model |   25.4215794642914
+all_theses_train_w7_s156.model |   25.23083266677305
+all_theses_test_w3_s208.model |   25.02177240975329
+all_theses_train_w8_s156.model |   25.018353951387084
+all_theses_test_w7_s208.model |   24.935437420889787
+all_theses_train_w9_s156.model |   24.614509199566136
+all_theses_train_w4_s208.model |   24.474016531603723
+all_theses_test_w8_s208.model |   24.43696883654373
+all_theses_test_w7_s156.model |   24.377447599846096
+all_theses_train_w6_s208.model |   23.986954723172126
+all_theses_train_w5_s208.model |   23.823851546375426
+all_theses_train_w8_s208.model |   23.20388669169092
+all_theses_train_w7_s208.model |   22.90475856813045
+all_theses_train_w9_s208.model |   22.17220793953162
+------------------------------
+🌈 🎉 🦄
+
+[[ Second scoring run. Adjusted to use similarity() for training set
+models and similarity_unseen_docs() for testing set.]]
+
+Scoring model
+       Model  |   Score
+------------------------------
+all_theses_test_w4_s52.model |   36.81895214315559
+all_theses_test_w3_s52.model |   36.52304665857218
+all_theses_test_w7_s52.model |   35.52549437514883
+all_theses_train_w4_s52.model |   35.31301532732014
+all_theses_test_w6_s52.model |   35.11000899602995
+all_theses_test_w5_s52.model |   35.09513725840812
+all_theses_train_w5_s52.model |   35.00586730327361
+all_theses_test_w8_s52.model |   34.18103622279404
+all_theses_test_w9_s52.model |   34.01575458934207
+all_theses_train_w3_s52.model |   33.947165189000046
+all_theses_train_w6_s52.model |   33.40818491478542
+all_theses_train_w7_s52.model |   33.29645505667883
+all_theses_train_w9_s52.model |   33.110613860673396
+all_theses_test_w3_s104.model |   31.905870305700205
+all_theses_train_w8_s52.model |   31.583151802167947
+all_theses_test_w4_s104.model |   29.452906983619666
+all_theses_test_w6_s104.model |   29.442556775943533
+all_theses_test_w5_s104.model |   29.022795144558778
+all_theses_test_w7_s104.model |   28.839721019081313
+all_theses_train_w4_s104.model |   28.05143721466704
+all_theses_test_w9_s104.model |   28.019964395935407
+all_theses_test_w5_s156.model |   27.946812359249545
+all_theses_test_w8_s104.model |   27.882353312604383
+all_theses_train_w5_s104.model |   27.405215311869622
+all_theses_test_w6_s156.model |   26.824222763760933
+all_theses_test_w4_s156.model |   26.613100376305052
+all_theses_test_w3_s156.model |   26.57185484812281
+all_theses_train_w3_s104.model |   26.411452677439993
+all_theses_test_w8_s156.model |   26.112761860414604
+all_theses_train_w7_s104.model |   25.727468137003516
+all_theses_train_w6_s104.model |   25.529952529094675
+all_theses_train_w9_s104.model |   25.402458685590634
+all_theses_test_w9_s156.model |   25.273554039379157
+all_theses_train_w8_s104.model |   25.101073802572312
+all_theses_train_w4_s156.model |   24.831902829240505
+all_theses_train_w3_s156.model |   24.762450166843603
+all_theses_test_w4_s208.model |   24.737521897882033
+all_theses_train_w5_s156.model |   24.584397402171188
+all_theses_test_w5_s208.model |   24.56402269632263
+all_theses_test_w7_s156.model |   24.56119617628084
+all_theses_train_w6_s156.model |   24.25819007212252
+all_theses_test_w3_s208.model |   24.05463153910575
+all_theses_test_w8_s208.model |   23.900667006663788
+all_theses_test_w6_s208.model |   23.61930310819661
+all_theses_train_w9_s156.model |   23.452226477701238
+all_theses_train_w7_s156.model |   23.129856669832186
+all_theses_test_w9_s208.model |   23.122475422230917
+all_theses_test_w7_s208.model |   22.951224290077477
+all_theses_train_w8_s156.model |   22.85221446031971
+all_theses_train_w3_s208.model |   22.84898902270402
+all_theses_train_w5_s208.model |   22.68525408562203
+all_theses_train_w4_s208.model |   22.598657513542314
+all_theses_train_w8_s208.model |   22.22984821850171
+all_theses_train_w6_s208.model |   22.178097234984744
+all_theses_train_w9_s208.model |   22.029562765231773
+all_theses_train_w7_s208.model |   20.92078969538826
+------------------------------
+🌈 🎉 🦄
