@@ -29,3 +29,6 @@ If you need to edit styles, edit files in `hamlet/static/sass/apps/`. Don't edit
 * run `python manage.py compress`
 * then run `python manage.py collectstatic`
 * use `hamlet.settings.local`
+
+## The neural net
+hamlet.model is a copy of all_theses_train_w4_s52.model (that is, the model trained with a window size of 4 and a step of 52).
