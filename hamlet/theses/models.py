@@ -1,12 +1,9 @@
+import pickle
 import re
-
-from gensim.models.doc2vec import Doc2Vec
 
 from django.conf import settings
 from django.db import models
 from django.utils.functional import cached_property
-
-NEURAL_NET = Doc2Vec.load(settings.MODEL_FILE)
 
 
 class Person(models.Model):
@@ -139,7 +136,17 @@ class Thesis(models.Model):
             'like http://hdl.handle.net/1721.1/39504')
     unextractable = models.BooleanField(default=False,
         help_text='Will be set to True if attempts to extract text from '
-            'the pdf failed; such theses are not part of the neural net.')
+            'the pdf failed; such theses are not part of the neural net, '
+            'and cannot be used in data visualization.')
+    # Contains the inferred vector for a document. Always needed for getting
+    # neural net data on documents outside of the training set. Documents
+    # inside the training set use their labels where possible, but cannot
+    # always do so (e.g. if being compared to documents outside the training
+    # set).
+    # The inferred vector is a numpy array; we use pickle to serialize it into
+    # bytes before storing it here. Access via the vector property, which
+    # unpickles.
+    _vector = models.BinaryField(blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -147,6 +154,10 @@ class Thesis(models.Model):
     @cached_property
     def label(self):
         return '1721.1-{}.txt'.format(self.identifier)
+
+    @cached_property
+    def vector(self):
+        return pickle.loads(self._vector)
 
     # ~~~~~~~~~~~~~~~~~~~~~ Functions for metadata ingest ~~~~~~~~~~~~~~~~~~~~~
 
@@ -205,10 +216,16 @@ class Thesis(models.Model):
         result in theses that humans find similar, but also a manageable number
         of results."""
         try:
-            friends = NEURAL_NET.docvecs.most_similar(self.label, topn=50)
+            friends = settings.NEURAL_NET.docvecs.most_similar(
+                [self.label], topn=50)
         except TypeError:
             # TypeError will be thrown if the thesis is not in the neural net.
-            return None
+            # In this case, fall back to using the inferred vector.
+            try:
+                friends = settings.NEURAL_NET.docvecs.most_similar(
+                    [self.vector], topn=50)
+            except:
+                return None
 
         friend_labels = [x[0] for x in friends if x[1] > threshold]
         friend_ids = [x.split('-')[1].split('.')[0] for x in friend_labels]
@@ -217,10 +234,15 @@ class Thesis(models.Model):
     def get_similarity(self, thesis):
         """Get the similarity between this and another thesis."""
         try:
-            return NEURAL_NET.docvecs.similarity(self.label, thesis.label)
+            return settings.NEURAL_NET.docvecs.similarity(
+                self.label, thesis.label)
         except KeyError:
             # In case one or both theses were not found in the neural net.
-            return None
+            try:
+                return settings.NEURAL_NET.docvecs.similarity_unseen_docs(
+                    self.vector, thesis.vector)
+            except:
+                return None
 
     class Meta:
         verbose_name_plural = 'theses'
