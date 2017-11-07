@@ -5,6 +5,9 @@ from .models import Thesis, Person, Department, Contribution
 
 class ContributionInline(admin.TabularInline):
     model = Contribution
+    # This is important! There are enough Persons in our data set that the
+    # admin page for individual theses will hang unless we use raw_id_fields.
+    raw_id_fields = ('person',)
 
 
 class ThesisAdmin(admin.ModelAdmin):
