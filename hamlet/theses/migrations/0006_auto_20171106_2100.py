@@ -40,6 +40,11 @@ def add_vector_data(apps, schema_editor):
         thesis.save()
 
 
+def remove_vector_data(apps, schema_editor):
+    Thesis = apps.get_model('theses', 'Thesis')
+    Thesis.objects.filter(unextractable=False).update(_vector=None)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -47,5 +52,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(add_vector_data),
+        migrations.RunPython(add_vector_data, remove_vector_data),
     ]
