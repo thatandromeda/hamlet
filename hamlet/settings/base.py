@@ -37,7 +37,6 @@ DJANGO_APPS = [
 
 HAMLET_APPS = [
     'hamlet.theses',
-    'hamlet.neural',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + HAMLET_APPS
@@ -211,7 +210,7 @@ LOGGING = {
 # *Make sure this file is not .gitignored* for Heroku deployment. This means
 # it should not live in neural/nets, where the test models are written. Once
 # you have selected a test model for use, move it to your preferred location.
-MODEL_FILE = os.path.join(PROJECT_DIR, 'neural', 'hamlet.model')
+MODEL_FILE = os.path.join(PROJECT_DIR, 'model', 'hamlet.model')
 
 NEURAL_NET = Doc2Vec.load(MODEL_FILE)
 
