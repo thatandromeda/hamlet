@@ -37,7 +37,6 @@ DJANGO_APPS = [
 
 HAMLET_APPS = [
     'hamlet.theses',
-    'hamlet.neural',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + HAMLET_APPS
