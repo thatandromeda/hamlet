@@ -3,6 +3,7 @@ nets/
 .env
 *.log
 temp.pdf
+notes/
 
 # Created by https://www.gitignore.io/api/git,osx,python,django,sublimetext
 

@@ -44,7 +44,8 @@ METS_NAMESPACE = {'mets': 'http://www.loc.gov/METS/',
 class LabeledLineSentence(object):
     def __init__(self, subdir):
         doc_list = glob(os.path.join(CUR_DIR, FILES_DIR, subdir, '*'))
-        self.doc_list = [doc for doc in doc_list if os.path.isfile(doc)]
+
+        self.doc_list = [doc for doc in doc_list if doc.endswith('.txt')]
 
     def __iter__(self):
         for filename in self.doc_list:
@@ -347,8 +348,16 @@ class ModelTrainer(object):
     # Train training model
     MAIN_FILES_DIR = os.path.join(CUR_DIR, FILES_DIR, 'main')
     STARTING_FILES = os.listdir(MAIN_FILES_DIR)
-    # First is training set; second is test set.
-    FILES_SUBDIRS = ['training', 'test']
+
+    def __init__(self, files_subdirs=None):
+        # If a list of subdirectory names is passed in, ModelTrainer will
+        # split files into those directories and train a model on each.
+        # If not, it will train on the entire contents of the main file
+        # directory.
+        if not files_subdirs:
+            files_subdirs = ['main']
+
+        self.FILES_SUBDIRS = files_subdirs
 
     def reset_directories(self):
         print('Resetting directories')
@@ -470,9 +479,13 @@ class ModelTrainer(object):
 
         print('All text extracted; time to get our ML on')
 
-        self.split_data(queryset)
-        training_iterator = self.get_iterator('training')
-        test_iterator = self.get_iterator('test')
+        iterators = []
+        if self.FILES_SUBDIRS:
+            self.split_data(queryset)
+            for subdir in self.FILES_SUBDIRS:
+                iterators.append(self.get_iterator(subdir))
+        else:
+                iterators.append(self.get_iterator(None))
 
         for window in range(3, 10):
             for step in range(1, 5):
@@ -481,12 +494,10 @@ class ModelTrainer(object):
 
                 print('Training with parameters window={}, '
                       'size={}'.format(window, size))
-                self.inner_train_model(window, size,
-                                       training_iterator,
-                                       '{}_train'.format(filename))
-                self.inner_train_model(window, size,
-                                       test_iterator,
-                                       '{}_test'.format(filename))
+                for iterator in iterators:
+                    self.inner_train_model(window, size,
+                                           iterator,
+                                           '{}_train'.format(filename))
 
                 print('Finished training, took {}'.format(
                     time.time() - start_time))
@@ -712,8 +723,9 @@ def write_metadata(args):
 def train_model(args):
     qs = args['queryset']
     fn = args['filename']
+    subdirs = args['subdir_list']
 
-    mt = ModelTrainer()
+    mt = ModelTrainer(subdirs)
     mt.train_model(fn, qs)
 
     model_list = os.listdir(os.path.join(CUR_DIR, 'nets'))
