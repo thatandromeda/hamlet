@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="gridband layout-3c">
+    <div class="grid-item">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <a href="{% url 'theses:similar_to' %}">Recommendation engine <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="panel-body">
+          Given a thesis, find out which other theses are most conceptually
+          similar.
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
