@@ -208,24 +208,18 @@ class Thesis(models.Model):
 
     # See https://radimrehurek.com/gensim/models/doc2vec.html for affordances
     # offered by doc2vec.
-    def get_most_similar(self, threshold=0.75):
+    def get_most_similar(self, threshold=0.75, topn=50):
         """Find theses above a given similarity threshold. If there are more
-        than 50, only the 50 most similar will be returned.
+        than topn, only the topn most similar will be returned (to a maximum
+        of 50).
 
         Threshold defaults to 0.75, because in practice that seems to usually
         result in theses that humans find similar, but also a manageable number
         of results."""
-        try:
-            friends = settings.NEURAL_NET.docvecs.most_similar(
-                [self.label], topn=50)
-        except TypeError:
-            # TypeError will be thrown if the thesis is not in the neural net.
-            # In this case, fall back to using the inferred vector.
-            try:
-                friends = settings.NEURAL_NET.docvecs.most_similar(
-                    [self.vector], topn=50)
-            except:
-                return None
+
+        topn = min(topn, 50)
+        friends = settings.NEURAL_NET.docvecs.most_similar(
+            [self.label], topn=50)
 
         friend_labels = [x[0] for x in friends if x[1] > threshold]
         friend_ids = [x.split('-')[1].split('.')[0] for x in friend_labels]
@@ -233,16 +227,8 @@ class Thesis(models.Model):
 
     def get_similarity(self, thesis):
         """Get the similarity between this and another thesis."""
-        try:
-            return settings.NEURAL_NET.docvecs.similarity(
-                self.label, thesis.label)
-        except KeyError:
-            # In case one or both theses were not found in the neural net.
-            try:
-                return settings.NEURAL_NET.docvecs.similarity_unseen_docs(
-                    self.vector, thesis.vector)
-            except:
-                return None
+        return settings.NEURAL_NET.docvecs.similarity(
+            self.label, thesis.label)
 
     class Meta:
         verbose_name_plural = 'theses'
