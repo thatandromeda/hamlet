@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <h2>Search for theses</h2>
+  <div class="gridband layout-2c">
+    <div class="grid-item">
+      {% with author_form as form %}
+        {% include "theses/_autocomplete_form.html" %}
+      {% endwith %}
+    </div>
+    <div class="grid-item">
+      {% with title_form as form %}
+        {% include "theses/_autocomplete_form.html" %}
+      {% endwith %}
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block footer %}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+
+{{ title_form.media }}
+{{ author_form.media }}
+
+{% endblock %}

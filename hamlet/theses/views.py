@@ -1,8 +1,11 @@
+from dal import autocomplete
+
 from django.http import Http404
-from django.views.generic import View
+from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 
-from .models import Thesis
+from .forms import TitleAutocompleteForm, AuthorAutocompleteForm
+from .models import Thesis, Person, Contribution
 
 
 class SimilarToView(DetailView):
@@ -29,6 +32,34 @@ class SimilarToView(DetailView):
             raise Http404('No matching thesis was found')
 
 
-class SimilarToSearchView(View):
+class SimilarToSearchView(TemplateView):
     """enter a thesis so that the SimilarToView can find it"""
-    pass
+    template_name = 'theses/search.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SimilarToSearchView, self).get_context_data(**kwargs)
+        context['title_form'] = TitleAutocompleteForm
+        context['author_form'] = AuthorAutocompleteForm
+        return context
+
+
+class AutocompleteAuthorView(autocomplete.Select2QuerySetView):
+    """enter a thesis so that the SimilarToView can find it"""
+    def get_queryset(self):
+        qs = Person.objects.filter(contribution__role=Contribution.AUTHOR)
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+
+        return qs
+
+
+class AutocompleteThesisView(autocomplete.Select2QuerySetView):
+    """enter a thesis so that the SimilarToView can find it"""
+    def get_queryset(self):
+        qs = Thesis.objects.filter(unextractable=False)
+
+        if self.q:
+            qs = qs.filter(title__icontains=self.q)
+
+        return qs

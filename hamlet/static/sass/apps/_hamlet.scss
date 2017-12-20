@@ -38,3 +38,10 @@
     padding-bottom: 0;
   }
 }
+
+// Make sure that autocomplete results are visible - otherwise they inherit
+// color from <body> and end up as white text on a white background, which is
+// maybe not a great life choice.
+.select2-results {
+  color: #444;
+}

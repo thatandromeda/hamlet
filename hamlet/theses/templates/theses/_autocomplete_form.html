@@ -1,0 +1,12 @@
+<form class="form-horizontal" action="{{ action }}">
+  {% csrf_token %}
+  {% for field in form %}
+    <label for="{{ field.id_for_label }}" class="field-label">{{ field.label }}</label>
+    <div class="form-group">
+      {{ field }}
+      <div class="b-search-submit form-action">
+        <button type="submit" class="btn button-primary">Search</button>
+      </div>
+    </div>
+  {% endfor %}
+</form>

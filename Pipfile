@@ -1,16 +1,13 @@
 [[source]]
+
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
+
 [dev-packages]
+
 requests = "*"
-
-
-
-
-
-
 
 
 [packages]
@@ -24,9 +21,12 @@ nltk = "*"
 tika = "*"
 "psycopg2" = "*"
 whitenoise = "*"
-"dj-database-url" = "*"
-"django-compressor" = "*"
-"django-libsass" = "*"
+dj-database-url = "*"
+django-compressor = "*"
+django-libsass = "*"
+django-autocomplete-light = "*"
+
 
 [requires]
+
 python_version = "3.6"
