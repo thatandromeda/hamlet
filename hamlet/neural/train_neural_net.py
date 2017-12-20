@@ -446,7 +446,8 @@ class ModelTrainer(object):
     def get_iterator(self, subdir):
         return LabeledLineSentence(subdir)
 
-    def inner_train_model(self, window, size, iterator, filename):
+    def inner_train_model(self, window, size, iterator, filename,
+                          max_vocab_size=None):
         model = Doc2Vec(alpha=0.025,
                         # Alpha starts at `alpha` and decreases to
                         # `min_alpha`
@@ -456,7 +457,8 @@ class ModelTrainer(object):
                         # Feature vector dimensionality (default=100).
                         size=size,
                         # Min word frequency for inclusion (default=5).
-                        min_count=10)
+                        min_count=10,
+                        max_vocab_size=max_vocab_size)
 
         print("Building vocab for %s..." % filename)
         model.build_vocab(iterator)

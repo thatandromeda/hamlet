@@ -31,4 +31,8 @@ If you need to edit styles, edit files in `hamlet/static/sass/apps/`. Don't edit
 * use `hamlet.settings.local`
 
 ## The neural net
-hamlet.model is a copy of all_theses_train_w4_s52.model (that is, the model trained with a window size of 4 and a step of 52).
+hamlet.model is a copy of max_250k_truncated.model. This is a model trained with a window size of 4 and a step of 52, limited to a vocabulary of 250k words, and saved with temporary training data deleted (but doctags vectors and inferences kept).
+
+## Heroku
+
+## AWS
