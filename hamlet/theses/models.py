@@ -159,6 +159,23 @@ class Thesis(models.Model):
     def vector(self):
         return pickle.loads(self._vector)
 
+    @cached_property
+    def authors(self):
+        contribs = Contribution.objects.filter(
+            thesis=self, role=Contribution.AUTHOR)
+        return Person.objects.filter(contribution__in=contribs)
+
+    @cached_property
+    def advisors(self):
+        contribs = Contribution.objects.filter(
+            thesis=self, role=Contribution.ADVISOR)
+        return Person.objects.filter(contribution__in=contribs)
+
+    @cached_property
+    def dspace_url(self):
+        return 'https://dspace.mit.edu/handle/1721.1/{id}'.format(
+            id=self.identifier)
+
     # ~~~~~~~~~~~~~~~~~~~~~ Functions for metadata ingest ~~~~~~~~~~~~~~~~~~~~~
 
     def add_people(self, people, author=True):
@@ -219,7 +236,7 @@ class Thesis(models.Model):
 
         topn = min(topn, 50)
         friends = settings.NEURAL_NET.docvecs.most_similar(
-            [self.label], topn=50)
+            [self.label], topn=topn)
 
         friend_labels = [x[0] for x in friends if x[1] > threshold]
         friend_ids = [x.split('-')[1].split('.')[0] for x in friend_labels]

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Theses most similar to those of author {{ object.name }}</h2>
+  {% for thesis in theses %}
+    <h3>{{ thesis.object.title }} ({{ thesis.object.year }})</h3>
+    {% with unextractable=thesis.unextractable suggestions=thesis.suggestions %}
+      {% include "theses/_similar_to_one_thesis.html" %}
+    {% endwith %}
+  {% endfor %}
+{% endblock %}

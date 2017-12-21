@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# This is needed on Heroku.
 echo "-----> Post-compile starting"
 python manage.py migrate
 # Don't use the release phase for compression because it's

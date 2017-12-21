@@ -1,19 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-  Soon there will be suggestions here for {{ object }}!
+  <h2>Theses most similar to <em>{{ thesis.title }}</em> ({{ thesis.authors.first.name }}; {{ thesis.year }})</h2>
+  {% include "theses/_similar_to_one_thesis.html" %}
 
-  {% if unextractable %}
-    <p>
-      While this is a valid thesis identifier, we were unable to OCR the PDF
-      and therefore cannot analyze its content. We're sorry. We feel sad that
-      we can't help you.
-    </p>
-
+  {% if thesis.unextractable %}
     <img src="https://cdn.vox-cdn.com/thumbor/LOJ14XV5tim4V8iqmmGqiFQ0e_k=/137x0:1359x759/1200x800/filters:focal(622x290:838x506)/cdn.vox-cdn.com/uploads/chorus_image/image/58025371/sadporg.0.jpg" />
-  {% else %}
-    {% for suggestion in suggestions %}
-
-    {% endfor %}
   {% endif %}
 {% endblock %}
