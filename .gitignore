@@ -8,6 +8,7 @@ notes/
 # large for github (even git-lfs), which causes pushes to github to be rejected.
 model/
 *.model
+*.npy
 
 # Created by https://www.gitignore.io/api/git,osx,python,django,sublimetext
 
