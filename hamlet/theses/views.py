@@ -79,8 +79,9 @@ class SimilarToSearchView(TemplateView):
             messages.error('No such author.')
             return HttpResponseRedirect('')
 
-    def _handle_thesis(self, identifier):
-        url = reverse('theses:similar_to', kwargs={'pk': identifier})
+    def _handle_thesis(self, pk):
+        thesis = Thesis.objects.get(pk=pk)
+        url = reverse('theses:similar_to', kwargs={'pk': thesis.identifier})
         return HttpResponseRedirect(url)
 
     def get_context_data(self, **kwargs):
