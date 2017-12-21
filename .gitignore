@@ -4,6 +4,9 @@ nets/
 *.log
 temp.pdf
 notes/
+# These files are actually needed for the operation of the system, but are too
+# large for github (even git-lfs), which causes pushes to github to be rejected.
+model/
 
 # Created by https://www.gitignore.io/api/git,osx,python,django,sublimetext
 
@@ -16,8 +19,9 @@ local_settings.py
 db.sqlite3
 media
 
-# If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
-# in your Git repository. Update and uncomment the following line accordingly.
+# If your build process includes running collectstatic, then you probably don't
+# need or want to include staticfiles/ in your Git repository. Update and
+# uncomment the following line accordingly.
 staticfiles/
 
 ### Git ###
