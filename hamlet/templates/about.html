@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>About hamlet</h2>
+
+<p>
+  Hamlet uses machine learning to power experimental, exploratory interfaces to MIT's thesis
+  collection.
+</p>
+
+<ul class="list-inline-pipe">
+  <li><a href="#how-it-works">How it works</a></li>
+  <li><a href="#team">The team</a></li>
+  <li><a href="#tech">The tech stack</a></li>
+</ul>
+
+<h3><a id="how-it-works"></a>How it works</h3>
+<p>
+  Hamlet is based on paragraph vectors (<a href="https://arxiv.org/pdf/1405.4053v2.pdf">Le and Mikolov (2014)</a>), which extend the word2vec algorithm (<a href="https://en.wikipedia.org/wiki/Word2vec">Wikipedia</a>; <a href="https://arxiv.org/abs/1301.3781">Mikolov et al. (2013)</a>). If you enjoy mathematical explanations, the original papers are quite readable and interesting; if you would prefer a more library-centric explanation, read on.
+</p>
+
+<p>
+  In traditional library cataloging, documents are assigned one or more subject headers (such as <a href="https://mit.worldcat.org/search?q=su%3ASpace+flight+Fiction">Space flight &mdash; Fiction</a>). You can find similar documents by looking for other documents with the same subject headers.
+</p>
+
+<p>
+  We usually think of subject headers as a list &mdash; "here are the five subjects assigned to this book". However, we might instead think of them as a <em>vector</em>: "for each of the millions of possible subject headers, assign them a Boolean depending on whether they describe this book".
+</p>
+
+<p>
+  Once you've got a vector rather than a list, though, there's no reason to restrict yourself to Booleans. Documents might be very much about some topics, and somewhat about others, a tiny bit about yet others, and not at all about the rest. For instance, one might end up with the following graph, situating science fiction books according to how much they're about gender and spaceships (tiny spoilers ahoy):
+</p>
+
+
+<img src="{% static 'img/gender_vs_spaceships.png' %}" alt="Graph of science fiction novels by amount of gender vs amount of spaceships"/>
+
+<p>
+  <em>Ancillary Justice</em> is very much about gender and also very much about spaceships. <em>Left Hand of Darkness</em> is also a lot about gender, but only a little bit (but more than zero) about spaceships. <em>The Martian</em> has basically no gender at all, and some spaceships, but not nearly as many as Mark Watney would like. Et cetera.
+</p>
+
+<p>
+  You can imagine there might be more than two concepts, and therefore instead of a two-dimensional graph you could have a three-dimensional space (or four-dimensional, or four-hundred-dimensional...) Each document has a vector, with one number per concept, that pinpoints its coordinates in that space.
+</p>
+
+<p>
+  Thinking about documents in this way gives you lots of interesting options. For instance, you can ask questions like, "Is <em>Ancillary Justice</em> more like <em>The Martian</em> or like <em>Star Wars</em>?" And you can get an answer that's literally a number &mdash; you can compare the distance between each book. You can also ask questions like "What do you get if you take <em>Star Wars</em> and add more gender?" or "If you start with <em>Ancillary Justice</em> and subtract out the stuff that's also in <em>Left Hand of Darkness</em>, what book is most like the parts that remain?" Because these questions all have mathematical meaning, computers can calculate their answers.
+</p>
+
+<p>
+  Doc2Vec basically reads in documents and generates spaces like the one above, with two important exceptions:
+</p>
+
+<ol>
+  <li>
+    There are potentially hundreds of dimensions in the concept space, not just two (as on the graph above).
+  </li>
+  <li>
+    Doc2Vec figures out the concept space as it goes, and it likely doesn't  map to meaningful human concepts like "gender" or "spaceships".
+  </li>
+</ol>
+
+<p>
+  So imagine a space that's hundreds of dimensions and doesn't have labels - but again, each document is a point in that space, and we can ask questions that are both semantically interesting and mathematically meaningful. "Which of these documents are most similar?" "If we started at one document and added or subtracted others, where would we end up?"
+</p>
+
+<h3><a id="team"></a>The team</h3>
+
+<h3><a id="tech"></a>The tech stack</h3>
+{% endblock %}
