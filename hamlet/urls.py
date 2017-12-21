@@ -20,6 +20,8 @@ from django.views.generic import TemplateView
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', TemplateView.as_view(template_name='home.html'), name='home'),
+    url(r'^about/$',
+        TemplateView.as_view(template_name='about.html'), name='about'),
     # Note that URLs imported from theses all have top-level URL paths!
     # Because they're the meat of the application there's no reason to add
     # cruft to the URL.

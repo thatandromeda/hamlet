@@ -8,7 +8,7 @@
     img {
       height: 35px;
       width: 35px;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
   }
 
@@ -21,15 +21,15 @@
   }
 
   .button-secondary {
-    margin-top: 8px;
-    background-color: $gray;
+    margin: 4px 8px 4px 0;
+    background-color: $brand-primary;
     color: $white;
+    border: 1px solid $white;
+    float: right;
 
     &:hover,
     &:focus {
-      background-color: $brand-primary;
-      border-color: $brand-primary;
-      border: 1px solid $white;
+      background-color: $brand-primary-accent;
     }
   }
 
