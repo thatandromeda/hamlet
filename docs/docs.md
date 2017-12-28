@@ -1,5 +1,13 @@
 # Documentation
 
+Run tests with `python manage.py test --settings=hamlet.settings.test`.
+
+This ensures that they use the test neural net. The primary keys of objects in
+the test file are written around the assumption that they will be present in
+both the test net and the fixtures.
+
+You can generate additional fixtures with statements like `python manage.py dumpdata theses.Person --pks=63970,29903 > hamlet/theses/fixtures/authors.json`, but make sure to include the pks of all objects already in the fixtures (or to write it to a separate file and then unite it with the existing - you can't just append because the json syntax will be wrong).
+
 ## Systems
 
 Running with pipenv. There's a .env file (kept out of version control) for use by `pipenv shell`. It specifies:
