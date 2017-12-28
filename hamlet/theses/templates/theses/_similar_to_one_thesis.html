@@ -20,12 +20,12 @@
             <ul class="list-unbulleted">
               <li>
                 Advisor{{ suggestion.advisors|pluralize }}: {% for advisor in suggestion.advisors.all %}
-                    {{ advisor.name }}<br />
+                    {{ advisor.name }}{% if not forloop.last %}; {% endif %}
                 {% endfor %}
               </li>
               <li>
                 {% for dept in suggestion.department.all %}
-                    {{ dept }}<br />
+                  {{ dept }}{% if not forloop.last %}; {% endif %}
                 {% endfor %}
               </li>
             </ul>
