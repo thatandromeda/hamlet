@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
-from gensim.models.doc2vec import Doc2Vec
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
@@ -210,15 +208,6 @@ LOGGING = {
 # -----------------------------------------------------------------------------
 # -----------------> third-party and hamlet configurations <-----------------
 # -----------------------------------------------------------------------------
-
-# This should be the full path of the neural net model to be used.
-# *Make sure this file is not .gitignored* for Heroku deployment. This means
-# it should not live in neural/nets, where the test models are written. Once
-# you have selected a test model for use, move it to your preferred location.
-MODEL_FILE = os.path.join(PROJECT_DIR, 'model', 'hamlet.model')
-
-NEURAL_NET = Doc2Vec.load(MODEL_FILE)
-
 
 # DJANGO-COMPRESSOR CONFIGURATION
 # -----------------------------------------------------------------------------

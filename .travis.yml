@@ -14,5 +14,7 @@ services:
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
 env:
-  - DJANGO_DB=travis_ci_test
-  - DJANGO_DB_USER=postgres
+  global:
+    - DJANGO_DB=travis_ci_test
+    - DJANGO_DB_USER=postgres
+    - DJANGO_SETTINGS_MODULE=hamlet.settings.test

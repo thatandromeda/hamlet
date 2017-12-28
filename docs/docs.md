@@ -31,8 +31,30 @@ If you need to edit styles, edit files in `hamlet/static/sass/apps/`. Don't edit
 * use `hamlet.settings.local`
 
 ## The neural net
-hamlet.model is a copy of max_250k_truncated.model. This is a model trained with a window size of 4 and a step of 52, limited to a vocabulary of 250k words, and saved with temporary training data deleted (but doctags vectors and inferences kept).
+hamlet.model is a copy of max_250k_truncated.model. This is a model trained with a window size of 4 and a step of 52, limited to a vocabulary of 250k words, and saved with temporary training data deleted (but doctags vectors and inferences kept). It is kept out of version control because it is too big.
+
+`hamlet/testmodels/` contains some smaller models not suitable for production, but usable for testing (and small enough to be pushed to GitHub, although it will complain, and hence used on Travis).
 
 ## Heroku
 
+We tried to deploy on Heroku but the model file needs ~2GB of memory and that gets spendy. In theory the `hamlet.settings.heroku` file should be deployable with a large enough instance; the app has successfully deployed with small model files (which are too limited to support the app's features).
+
 ## AWS
+
+https://mitlibraries-hamlet.mit.edu/
+
+### Deployment
+
+The goal is to have master autodeploy via Travis. Right now if you want something to be deployed, ask Andy.
+
+AWS doesn't speak Pipfile yet, so we generate requirements.txt as part of the deploy process.
+
+### Architecture
+
+The model files live in a bucket on S3. They are expected to change infrequently, so we haven't automated this process; talk to Andy if you need to push changes. The model files are *not* synced through github because they're too large. The s3 bucket is synced to a directory created on the the hamlet instance through a deploy script; `hamlet.settings.aws` creates this directory and tells `MODEL_FILE` to look in it.
+
+Static is deployed using whitenoise within the hamlet instance. It's not big enough for us to have bothered with a real CDN.
+
+Client connections run over https to the load balancer. Connections between the load balancer and the instance(s) are http, but on a private network only accessible by the load balancer and allowed instances. Config is in `.ebextensions/05_elb.config`.
+
+Application lgging doesn't actually work right now because the filesystem isn't persistent and we havne't thought through where AWS might want a logstream to go. #yolo
