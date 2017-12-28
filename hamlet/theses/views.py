@@ -26,7 +26,7 @@ class SimilarToView(DetailView):
         return context
 
     def get_object(self, queryset=None):
-        identifier = self.kwargs.get(self.pk_url_kwarg, None)
+        identifier = self.kwargs.get('identifier', None)
 
         try:
             return Thesis.objects.get(identifier=identifier)
