@@ -1,0 +1,1 @@
+[{"model": "theses.department", "pk": 275, "fields": {"name": "Department of Electrical Engineering and Computer Science", "course": ""}}, {"model": "theses.department", "pk": 287, "fields": {"name": "Department of Earth and Planetary Sciences", "course": ""}}]

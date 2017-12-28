@@ -10,6 +10,12 @@ model/
 *.model
 *.npy
 
+# But we need to keep a few (chosen for smallness) so that we can run tests on
+# Travis.
+!testmodel.model
+!testmodel.model.syn1neg.npy
+!testmodel.model.wv.syn0.npy
+
 # Created by https://www.gitignore.io/api/git,osx,python,django,sublimetext
 
 ### Django ###
