@@ -1,1 +1,1 @@
-[{"model": "theses.contribution", "pk": 63354, "fields": {"thesis": 32174, "person": 29406, "role": "author"}}]
+[{"model": "theses.contribution", "pk": 125562, "fields": {"thesis": 60330, "person": 63970, "role": "author"}}, {"model": "theses.contribution", "pk": 125563, "fields": {"thesis": 60330, "person": 29903, "role": "advisor"}}]

@@ -45,7 +45,7 @@ class SimilarToViewTests(BaseTestCase):
         assert not re.search('/similar_to/\d+', str(response.content))
 
     def test_suggestion_context(self):
-        thesis = Thesis.objects.get(pk=32174)
+        thesis = Thesis.objects.get(pk=76265)
         assert not thesis.unextractable
         url = reverse('theses:similar_to',
             kwargs={'identifier': thesis.identifier})
@@ -54,17 +54,13 @@ class SimilarToViewTests(BaseTestCase):
         assert 'suggestions' in response.context
 
         pks = [t.pk for t in response.context['suggestions']]
-        assert 39337 in pks
-        assert 39391 in pks
-        assert 41449 in pks
-        assert 47003 in pks
+        assert 43703 in pks
+        assert 60330 in pks
 
         content = str(response.content)
 
-        assert 'Energy and topology of heteropolymers' in content
-        assert 'Neural mechanisms involved in memory formation and retrieval within the rodent hippocampus' in content  # noqa
-        assert 'Essays on the emiprical properties of stock and mutual fund returns' in content  # noqa
-        assert 'Quantification of benzo[a]pyrene-diol-epoxide adducts by laser-induced fluorescence spectroscopy' in content  # noqa
+        assert 'Clock division as a power saving strategy in a system constrained by high transmission frequency and low data rate' in content  # noqa
+        assert 'Architecture for ultra-low power multi-channel transmitters for Body Area Networks using RF resonators' in content  # noqa
 
     def test_get_correct_object(self):
         # We use the thesis identifier in the URL to aid in URL hacking -
@@ -82,49 +78,43 @@ class SimilarToViewTests(BaseTestCase):
 
 class SimilarToByAuthorViewTests(BaseTestCase):
     def test_correct_theses_in_context(self):
-        url = reverse('theses:similar_to_by_author', kwargs={'pk': 29406})
+        url = reverse('theses:similar_to_by_author', kwargs={'pk': 63970})
         response = self.client.get(url)
 
         # Check assumption.
-        assert response.context['theses'][0]['object'].pk == 32174
+        assert response.context['theses'][0]['object'].pk == 60330
 
         pks = [t.pk for t in response.context['theses'][0]['suggestions']]
-        assert 39337 in pks
-        assert 39391 in pks
-        assert 41449 in pks
-        assert 47003 in pks
+        assert 76265 in pks
 
         content = str(response.content)
 
-        assert 'Energy and topology of heteropolymers' in content
-        assert 'Neural mechanisms involved in memory formation and retrieval within the rodent hippocampus' in content  # noqa
-        assert 'Essays on the emiprical properties of stock and mutual fund returns' in content  # noqa
-        assert 'Quantification of benzo[a]pyrene-diol-epoxide adducts by laser-induced fluorescence spectroscopy' in content  # noqa
+        assert 'Ultra low power, high sensitivity secure wake-up receiver for the Internet of Things' in content  # noqa
 
     def test_get_theses(self):
-        url = reverse('theses:similar_to_by_author', kwargs={'pk': 29406})
+        url = reverse('theses:similar_to_by_author', kwargs={'pk': 63970})
         request = RequestFactory().get(url)
-        view = setup_view(views.SimilarToByAuthorView, request, pk=29406)
+        view = setup_view(views.SimilarToByAuthorView, request, pk=63970)
         view_theses = view.get_theses()
 
         pks = [t.pk for t in view_theses]
-        assert [32174] == pks
+        assert [60330] == pks
 
 
 class SimilarToSearchViewTests(BaseTestCase):
     def test_author_post_returns_author_view(self):
         response = self.client.post(reverse('theses:similar_to'),
-            {'author': 29406})
+            {'author': 63970})
         assert response.status_code == 302
         assert response.url == reverse('theses:similar_to_by_author',
-            kwargs={'pk': 29406})
+            kwargs={'pk': 63970})
 
     def test_thesis_post_returns_thesis_view(self):
         response = self.client.post(reverse('theses:similar_to'),
-            {'title': 32174})
+            {'title': 76265})
         assert response.status_code == 302
         assert response.url == reverse('theses:similar_to',
-            kwargs={'identifier': Thesis.objects.get(pk=32174).identifier})
+            kwargs={'identifier': Thesis.objects.get(pk=76265).identifier})
 
     def test_author_form_in_context(self):
         response = self.client.get(reverse('theses:similar_to'))
