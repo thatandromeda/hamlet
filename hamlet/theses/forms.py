@@ -1,5 +1,6 @@
 import magic
 
+from captcha.fields import CaptchaField
 from dal import autocomplete
 
 from django import forms
@@ -37,7 +38,6 @@ class FiletypeValidator:
         self.allowed_filetypes = allowed_filetypes
 
     def __call__(self, value):
-        print('validating filemagic')
         chunktypes = []
         for chunk in value.chunks():
             chunktypes.append(magic.from_buffer(chunk))
@@ -55,8 +55,6 @@ class FileSizeValidator:
         self.max_size = max_size
 
     def __call__(self, value):
-        print(len(value))
-        print('validating filesize')
         if len(value) >= self.max_size:
             raise ValidationError(self.message %
                 {'allowed_size': self.max_size})
@@ -101,3 +99,4 @@ class UploadFileForm(forms.Form):
                     FiletypeValidator(allowed_filetypes)],
         widget=forms.ClearableFileInput(attrs={'class': 'field field-upload'}),
         help_text='.txt files only.')
+    captcha = CaptchaField(help_text='Sorry, no spammers.')
