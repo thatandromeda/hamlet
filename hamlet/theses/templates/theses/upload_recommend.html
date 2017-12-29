@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+  <h2>If you wrote this, you might also like...</h2>
+
+  <p>
+    Upload an article draft, thesis chapter-in-progress, et cetera and find out what MIT theses are most similar to it. (.txt files only, please.)
+  </p>
+
+  <p>
+    The system will try its best no matter what content you upload, but is likely to only have meaningful results with scientific documents.
+  </p>
+
   {% for error in form.file.errors  %}
     <div class="alert alert-banner error">
       {{ error }}
@@ -23,7 +33,12 @@
       </p>
     </div>
     <div class="field-wrap">
+      <label for="{{ form.captcha.id_for_label }}" class="field-label">Type the letters</label>
+      </br/>
       {{ form.captcha }}
+      <p class="tip">
+        No spammers, please.
+      </p>
     </div>
     <div class="b-search-submit form-action">
       <button type="submit" class="btn button-primary">Upload</button>
