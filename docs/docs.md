@@ -28,6 +28,8 @@ Postgres needs a database and user (default values are 'hamlet' for database nam
 
 python-magic needs libmagic (`brew install libmagic` on OSX).
 
+captcha needs `apt-get -y install libz-dev libjpeg-dev libfreetype6-dev python-dev` or similar.
+
 ## Static assets
 If you need to edit styles, edit files in `hamlet/static/sass/apps/`. Don't edit css directly - these changes will be blown away during asset precompilation.
 

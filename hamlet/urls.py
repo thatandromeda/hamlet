@@ -26,4 +26,5 @@ urlpatterns = [
     # Because they're the meat of the application there's no reason to add
     # cruft to the URL.
     url(r'', include('hamlet.theses.urls', namespace='theses')),
+    url(r'^captcha/', include('captcha.urls')),
 ]

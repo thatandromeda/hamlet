@@ -26,6 +26,7 @@ django-compressor = "*"
 django-libsass = "*"
 django-autocomplete-light = "*"
 python-magic = "*"
+django-simple-captcha = "*"
 
 
 [requires]

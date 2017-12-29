@@ -229,3 +229,8 @@ COMPRESS_PRECOMPILERS = (
 )
 
 COMPRESS_ROOT = STATIC_ROOT
+
+# DJANGO-SIMPLE-CAPTCHA CONFIGURATION
+# -----------------------------------------------------------------------------
+
+INSTALLED_APPS += ('captcha',)
