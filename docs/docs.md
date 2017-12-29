@@ -51,6 +51,13 @@ We tried to deploy on Heroku but the model file needs ~2GB of memory and that ge
 
 https://mitlibraries-hamlet.mit.edu/
 
+Environment Varibles defined in AWS for security reasons:
+-All Database variables (these are standard and can put directly in your code)
+-SECRET_KEY - will be created by TS3 or provided by developer securely
+
+All other variables are defined with the config files of the .ebextensions folder and can be changed/modified and or added to for future use.
+
+
 ### Deployment
 
 The goal is to have master autodeploy via Travis. Right now if you want something to be deployed, ask Andy.
