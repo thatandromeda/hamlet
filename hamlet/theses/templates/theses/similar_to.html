@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>Theses most similar to <em>{{ thesis.title }}</em> ({{ thesis.authors.first.name }}; {{ thesis.year }})</h2>
+  {% if thesis %}
+    <h2>Theses most similar to <em>{{ thesis.title }}</em> ({{ thesis.authors.first.name }}; {{ thesis.year }})</h2>
+  {% else %}
+    <h2>Theses most similar to your uploaded text</h2>
+  {% endif %}
+
   {% include "theses/_similar_to_one_thesis.html" %}
 
   {% if thesis.unextractable %}

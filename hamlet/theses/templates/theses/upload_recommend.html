@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>If you wrote this, you might also like...</h2>
+
+  <p>
+    Upload an article draft, thesis chapter-in-progress, et cetera and find out what MIT theses are most similar to it. Don't have one? Try using the text of a Wikipedia page on a STEM topic. (.txt files only, please.)
+  </p>
+
+  <p>
+    The system will try its best no matter what content you upload, but is likely to only have meaningful results with scientific documents.
+  </p>
+
+  {% for error in form.file.errors  %}
+    <div class="alert alert-banner error">
+      {{ error }}
+    </div>
+  {% endfor %}
+
+  {% for error in form.captcha.errors  %}
+    <div class="alert alert-banner error">
+      {{ error }}
+    </div>
+  {% endfor %}
+
+  <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="field-wrap">
+      <label for="{{ form.file.id_for_label }}" class="field-label">{{ form.file.label }}</label>
+      {{ form.file }}
+      <p class="tip">
+        {{ form.file.help_text}}
+      </p>
+    </div>
+    <div class="field-wrap">
+      <label for="{{ form.captcha.id_for_label }}" class="field-label">Type the letters</label>
+      </br/>
+      {{ form.captcha }}
+      <p class="tip">
+        No spammers, please.
+      </p>
+    </div>
+    <div class="b-search-submit form-action">
+      <button type="submit" class="btn button-primary">Upload</button>
+    </div>
+  </form>
+
+{% endblock %}

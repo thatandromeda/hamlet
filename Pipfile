@@ -25,6 +25,9 @@ dj-database-url = "*"
 django-compressor = "*"
 django-libsass = "*"
 django-autocomplete-light = "*"
+python-magic = "*"
+django-simple-captcha = "*"
+pillow = "*"
 
 
 [requires]

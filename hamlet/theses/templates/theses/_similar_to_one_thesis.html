@@ -4,41 +4,47 @@
     analyze its content.  We're sorry. We feel sad that we can't help you.
   </p>
 {% else %}
-  <div class="gridband layout-3c">
-    {% for suggestion in suggestions %}
-      <div class="grid-item">
-        <div class="panel panel-info">
-          <div class="panel-heading">
-            <h3><a href="{% url 'theses:similar_to' suggestion.identifier %}">{{ suggestion.title }}</a></h3>
-            <h3 class="subtitle2">
-            {% for author in suggestion.authors.all %}
-                {{ author.name }}{% if not forloop.last %}; {% endif %}
-            {% endfor %} ({{ suggestion.year }})
-            </h3>
-          </div>
-          <div class="panel-body">
-            <ul class="list-unbulleted">
-              <li>
-                Advisor{{ suggestion.advisors|pluralize }}: {% for advisor in suggestion.advisors.all %}
-                    {{ advisor.name }}{% if not forloop.last %}; {% endif %}
-                {% endfor %}
-              </li>
-              <li>
-                {% for dept in suggestion.department.all %}
-                  {{ dept }}{% if not forloop.last %}; {% endif %}
-                {% endfor %}
-              </li>
-            </ul>
-          </div>
-          <div class="panel-footer">
-            <a href="{{ suggestion.dspace_url }}">Read it</a>
+  {% if suggestions %}
+    <div class="gridband layout-3c">
+      {% for suggestion in suggestions %}
+        <div class="grid-item">
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3><a href="{% url 'theses:similar_to' suggestion.identifier %}">{{ suggestion.title }}</a></h3>
+              <h3 class="subtitle2">
+              {% for author in suggestion.authors.all %}
+                  {{ author.name }}{% if not forloop.last %}; {% endif %}
+              {% endfor %} ({{ suggestion.year }})
+              </h3>
+            </div>
+            <div class="panel-body">
+              <ul class="list-unbulleted">
+                <li>
+                  Advisor{{ suggestion.advisors|pluralize }}: {% for advisor in suggestion.advisors.all %}
+                      {{ advisor.name }}{% if not forloop.last %}; {% endif %}
+                  {% endfor %}
+                </li>
+                <li>
+                  {% for dept in suggestion.department.all %}
+                    {{ dept }}{% if not forloop.last %}; {% endif %}
+                  {% endfor %}
+                </li>
+              </ul>
+            </div>
+            <div class="panel-footer">
+              <a href="{{ suggestion.dspace_url }}">Read it</a>
+            </div>
           </div>
         </div>
-      </div>
-      {% if forloop.counter|divisibleby:'3' %}
-        </div>
-        <div class="gridband layout-3c">
-      {% endif %}
-    {% endfor %}
-  </div>
+        {% if forloop.counter|divisibleby:'3' %}
+          </div>
+          <div class="gridband layout-3c">
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>
+      Hamlet couldn't find anything particularly similar to that document.
+    </p>
+  {% endif %}
 {% endif %}
