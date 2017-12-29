@@ -61,6 +61,12 @@ Environment Varibles defined in AWS for security reasons:
 
 All other variables are defined with the config files of the .ebextensions folder and can be changed/modified and or added to for future use.
 
+aws.amazon.com -
+* search for S3
+* find the hamlet-models bucket
+* put model files there
+
+You should be logged in via MIT Touchstone. If you're not in the relevant moira group, ask TS3. Re-uploading files will not trigger a server restart; you'll need to do that manually, or do something to update master and kick off a build.
 
 ### Deployment
 
