@@ -1,20 +1,30 @@
 language: python
 python:
-  - "3.6"
+- '3.6'
 install:
-  - "pip install pipenv"
-  - "pip install coveralls"
-  - "pipenv install"
-script:
-  coverage run manage.py test
-after_success:
-  coveralls
+- pip install pipenv
+- pip install coveralls
+- pipenv install
+script: coverage run manage.py test
+after_success: coveralls
 services:
-  - postgresql
+- postgresql
 before_script:
-  - psql -c 'create database travis_ci_test;' -U postgres
+- psql -c 'create database travis_ci_test;' -U postgres
 env:
   global:
-    - DJANGO_DB=travis_ci_test
-    - DJANGO_DB_USER=postgres
-    - DJANGO_SETTINGS_MODULE=hamlet.settings.test
+  - DJANGO_DB=travis_ci_test
+  - DJANGO_DB_USER=postgres
+  - DJANGO_SETTINGS_MODULE=hamlet.settings.test
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: AKIAJQXIO6JJ6FWT7HFQ
+  secret_access_key: # This is encrypted, so it's OK to have it here.
+    secure: JFotdLDjfTiRFlhmc1eWIT35kbocYizPgVu96bGZX1gvRudRY6x7SLsha2RPqv80ImkhWkfxhdxnCtvTUoprghk6YhA8Z28pz8BmdiZDT3i/AfGvtETSK5h7Z3Vm6wY3M37cz740+eL9rThlcElTGtz0KNtvnQglPiQJIJqaeTpMFVpV6DDYqiQd+sHo09Lyr709HsNTLq6m+AmlIrnG0keywZjQvwzg+9c73UJ1Z1iEgY0h6fAzHA4C83q1f/NUP1UBk0PFzjHNp0fcDv+Jyjl9BMx5bmz/ug7c6mlpRbTjKrS8ncvlQnR+wXSy1naFYhWJEAxRVmLqviY1PST1URFFOJoTR8bHPOWCV4jib7MFHDb0HW9U1n+6hYYRrJgvAdu9wSeShoRXBNGlX1PiL/xWbZOJFyWw6rLCCUimKci3gCfnGP/VVTlatnOm8P8J8lg6Oy4MypHfJzzhStdspj4BKfv1hQWKQbF1DRseInDjeiE29/wZ/osV7B37ArgBN2o2ikCB4kZnSlvex6zSSHZborgpSRLz36XUqhOaUcd0XbgFu5YVdyTzRjgUV0zFZKtFUqPv49kb9HboSv1D6gQV1gXtWyR8M+GL0B9mZ08om7nj0SMkbZSTNAa+PqyXwmbsYobSQa1llstCe3zuh5V5Sh4luz4uRfeAeqz2nAs=
+  region: us-east-1
+  bucket_name: elasticbeanstalk-us-east-1-672626379771
+  app: hamlet
+  env: hamtest
+  on:
+    repo: MITLibraries/hamlet
+    branch: master
