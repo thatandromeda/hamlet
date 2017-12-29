@@ -13,7 +13,7 @@
               <h3><a href="{% url 'theses:similar_to' suggestion.identifier %}">{{ suggestion.title }}</a></h3>
               <h3 class="subtitle2">
               {% for author in suggestion.authors.all %}
-                  {{ author.name }}{% if not forloop.last %}; {% endif %}
+                <a href="{% url 'theses:similar_to_by_author' author.pk %}">{{ author.name }}</a>{% if not forloop.last %}; {% endif %}
               {% endfor %} ({{ suggestion.year }})
               </h3>
             </div>
@@ -21,7 +21,7 @@
               <ul class="list-unbulleted">
                 <li>
                   Advisor{{ suggestion.advisors|pluralize }}: {% for advisor in suggestion.advisors.all %}
-                      {{ advisor.name }}{% if not forloop.last %}; {% endif %}
+                    {{ advisor.name }}{% if not forloop.last %}; {% endif %}
                   {% endfor %}
                 </li>
                 <li>
