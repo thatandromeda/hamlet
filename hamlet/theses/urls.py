@@ -13,4 +13,6 @@ urlpatterns = [
         views.AutocompleteAuthorView.as_view(), name='autocomplete_author'),
     url(r'^autocomplete/thesis/$',
         views.AutocompleteThesisView.as_view(), name='autocomplete_thesis'),
+    url(r'^upload/recommend/$',
+        views.UploadRecommendationView.as_view(), name='upload_recommend'),
 ]

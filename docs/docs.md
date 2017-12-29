@@ -26,6 +26,8 @@ gensim wants a C compiler.
 
 Postgres needs a database and user (default values are 'hamlet' for database name and username, no password; override this if desired in .env with DJANGO_DB, DJANGO_DB_USER, DJANGO_DB_PASSWORD)
 
+python-magic needs libmagic (`brew install libmagic` on OSX).
+
 ## Static assets
 If you need to edit styles, edit files in `hamlet/static/sass/apps/`. Don't edit css directly - these changes will be blown away during asset precompilation.
 

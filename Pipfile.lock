@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c6cc2041ee291b29dffe052f76e2fa195bd40e76ad6df953e82f74d34326efc7"
+            "sha256": "e6f7b341697961efa887c4345edbf949992f6146523ffc89d25fd9945ed8e719"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -38,17 +38,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:5f0e6f5c4e70bd226946073caef9b7e6fb715ed9af6887a77f3de3d8530514d7",
-                "sha256:19fc09ad1ad7f30880823d41f277b59f781190852c9cde0ad81c4ef6a1c2be2a"
+                "sha256:d407829f895b4e4bb384c50242c28f44a61514c8d72238b5e3d763122e396886",
+                "sha256:ce8da4c1f5dd965a0d055b6842eb2d93348aded99d7e3c32f8aaea2b6921df8a"
             ],
-            "version": "==1.5.3"
+            "version": "==1.5.6"
         },
         "botocore": {
             "hashes": [
-                "sha256:fb68fc9f90c28ea8a3e855e154989b15ac810b1a261c6f0b893a064a9d6a81f2",
-                "sha256:8bcc7f5c835a27c250fac9ec2cb561f937be72a067739e3ca53a5a1cf41030b3"
+                "sha256:c3d6954f2d8bd97d826d09077bff73da2f28880e9623b3e0b0a9fe899be6cd3f",
+                "sha256:19aef3d362b887bcfa30bf19433d2b2f6d6897587afe397ada20e8a3603850ae"
             ],
-            "version": "==1.8.17"
+            "version": "==1.8.20"
         },
         "bz2file": {
             "hashes": [
@@ -369,6 +369,13 @@
             ],
             "version": "==2.6.1"
         },
+        "python-magic": {
+            "hashes": [
+                "sha256:f2674dcfad52ae6c49d4803fa027809540b130db1dec928cfbb9240316831375",
+                "sha256:f3765c0f582d2dfc72c15f3b5a82aecfae9498bd29ca840d72f37d7bd38bfcd5"
+            ],
+            "version": "==0.4.15"
+        },
         "pytz": {
             "hashes": [
                 "sha256:80af0f3008046b9975242012a985f04c5df1f01eed4ec1633d56cc47a75a6a48",
@@ -446,9 +453,9 @@
         },
         "smart-open": {
             "hashes": [
-                "sha256:9e2591241e92f552cf4225b1b70bbaeace0122fd9068bfc769567aeb947e1a4e"
+                "sha256:8fd2de1c359bd0074bd6d334a5b9820ae1c5b6ba563970b95052bace4b71baeb"
             ],
-            "version": "==1.5.5"
+            "version": "==1.5.6"
         },
         "tika": {
             "hashes": [

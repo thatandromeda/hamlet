@@ -5,8 +5,11 @@ from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
+from django.views.generic.edit import FormView
 
-from .forms import TitleAutocompleteForm, AuthorAutocompleteForm
+from .forms import (TitleAutocompleteForm,
+                    AuthorAutocompleteForm,
+                    UploadFileForm)
 from .models import Thesis, Person, Contribution
 
 
@@ -122,3 +125,9 @@ class AutocompleteThesisView(autocomplete.Select2QuerySetView):
             qs = qs.filter(title__icontains=self.q)
 
         return qs
+
+
+class UploadRecommendationView(FormView):
+    template_name = 'theses/upload_recommend.html'
+    form_class = UploadFileForm
+    success_url = '/'
