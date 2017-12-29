@@ -1,7 +1,9 @@
 from dal import autocomplete
 
+from django.conf import settings
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
@@ -130,4 +132,35 @@ class AutocompleteThesisView(autocomplete.Select2QuerySetView):
 class UploadRecommendationView(FormView):
     template_name = 'theses/upload_recommend.html'
     form_class = UploadFileForm
-    success_url = '/'
+
+    # Only return documents above this similarity threshold. (When similarity
+    # gets too low, it becomes meaningless. "Too low" is an art, not a
+    # science.)
+    threshold = 0.65
+
+    def _get_similar_documents(self, doc):
+        # Split document into a list of words and infer the docvec.
+        bag_of_words = []
+        for chunk in doc.chunks():
+            bag_of_words.extend(str(chunk).strip().split(' '))
+
+        vector = settings.NEURAL_NET.infer_vector(bag_of_words)
+
+        # Find the most similar docvecs to this inferred vector.
+        doclist = settings.NEURAL_NET.docvecs.most_similar([vector])
+
+        # Limit to the documents above our similarity threshold. This gives a
+        # list of document filenames.
+        simdocs = [doc[0] for doc in doclist if doc[1] >= self.threshold]
+
+        # Turn filenames into document identifiers so we can feed them to SQL.
+        ids = [s.replace('1721.1-', '').replace('.txt', '') for s in simdocs]
+
+        return Thesis.objects.filter(identifier__in=ids)
+
+    def form_valid(self, form):
+        context = {}
+        doc = self.request.FILES['file']
+        print(dir(doc))
+        context['suggestions'] = self._get_similar_documents(doc)
+        return render(self.request, 'theses/similar_to.html', context)

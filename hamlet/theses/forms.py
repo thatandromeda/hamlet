@@ -40,16 +40,17 @@ class FiletypeValidator:
     def __call__(self, value):
         chunktypes = []
         for chunk in value.chunks():
-            chunktypes.append(magic.from_buffer(chunk))
+            chunktypes.append(magic.from_buffer(chunk, mime=True))
 
-        if not all([chunktype == 'ASCII text' for chunktype in chunktypes]):
+        if not all([chunktype in self.allowed_filetypes
+                    for chunktype in chunktypes]):
             raise ValidationError(self.message %
                 {'allowed_filetypes': ', '.join(self.allowed_filetypes)})
 
 
 @deconstructible
 class FileSizeValidator:
-    message = 'The file is too large. The maximum file size is %(allowed_size)s.'  # noqa
+    message = 'The file is too large (%(size)s KB). The maximum file size is %(allowed_size)s KB.'  # noqa
 
     def __init__(self, max_size=2 * 1024 * 1024):
         self.max_size = max_size
@@ -57,7 +58,8 @@ class FileSizeValidator:
     def __call__(self, value):
         if len(value) >= self.max_size:
             raise ValidationError(self.message %
-                {'allowed_size': self.max_size})
+                {'size': round(len(value) / 1024),
+                 'allowed_size': round(self.max_size / 1024)})
 
 
 class AuthorAutocompleteForm(forms.ModelForm):
@@ -89,8 +91,8 @@ class TitleAutocompleteForm(forms.ModelForm):
 class UploadFileForm(forms.Form):
     allowed_extensions = ['txt']
     allowed_mimetypes = ['text/plain']
-    allowed_filetypes = ['ASCII text']
-    max_size = 2 * 1024 * 1024
+    allowed_filetypes = ['text/plain']
+    max_size = 4 * 1024 * 1024
 
     file = forms.FileField(
         validators=[FileSizeValidator(max_size),
