@@ -16,6 +16,8 @@ env:
   - DJANGO_DB=travis_ci_test
   - DJANGO_DB_USER=postgres
   - DJANGO_SETTINGS_MODULE=hamlet.settings.test
+before_deploy:
+  - rm -rf hamlet/testmodels/
 deploy:
   provider: elasticbeanstalk
   access_key_id: AKIAJQXIO6JJ6FWT7HFQ
@@ -24,7 +26,7 @@ deploy:
   region: us-east-1
   bucket_name: elasticbeanstalk-us-east-1-672626379771
   app: hamlet
-  env: hamtest
+  env: Hamlet-prod
   on:
     repo: MITLibraries/hamlet
-    branch: master
+    branch: travisbeantest
