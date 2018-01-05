@@ -33,4 +33,4 @@ deploy:
   skip_cleanup: true
   on:
     repo: MITLibraries/hamlet
-    branch: travisbeantest
+    branch: master
