@@ -18,7 +18,7 @@ env:
   - DJANGO_SETTINGS_MODULE=hamlet.settings.test
 before_deploy:
   - rm -rf hamlet/testmodels/
-  - pipenv lock -r
+  - pipenv lock --requirements > requirements.txt
   - git add requirements.txt
   - git commit -am "requirements/testmodels cleanup"
 deploy:
