@@ -19,6 +19,7 @@ env:
 before_deploy:
   - rm -rf hamlet/testmodels/
   - pipenv lock -r
+  - git add requirements.txt
   - git commit -am "requirements/testmodels cleanup"
 deploy:
   provider: elasticbeanstalk
