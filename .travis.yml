@@ -30,6 +30,7 @@ deploy:
   bucket_name: elasticbeanstalk-us-east-1-672626379771
   app: hamlet
   env: Hamlet-prod
+  skip_cleanup: true
   on:
     repo: MITLibraries/hamlet
     branch: travisbeantest
