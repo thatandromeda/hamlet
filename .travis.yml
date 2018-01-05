@@ -18,6 +18,8 @@ env:
   - DJANGO_SETTINGS_MODULE=hamlet.settings.test
 before_deploy:
   - rm -rf hamlet/testmodels/
+  - pipenv lock -r
+  - git commit -am "requirements/testmodels cleanup"
 deploy:
   provider: elasticbeanstalk
   access_key_id: AKIAJQXIO6JJ6FWT7HFQ
