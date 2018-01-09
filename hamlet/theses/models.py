@@ -64,9 +64,6 @@ class Person(models.Model):
         # Strip leading & trailing whitespace.
         names = [name.strip() for name in names]
 
-        # Strip trailing periods, except when part of "Jr." or an initial.
-        names = [re.sub('(?<!( [A-Z]|Jr)).$', '', name) for name in names]
-
         return names
 
     class Meta:
