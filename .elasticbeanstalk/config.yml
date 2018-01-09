@@ -1,8 +1,8 @@
 branch-defaults:
   beanstalk:
-    environment: Hamtest
+    environment: Hamlet-Prod
 environment-defaults:
-  Hamtest:
+  Hamlet-Prod:
     branch: null
     repository: null
 global:
