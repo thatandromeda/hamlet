@@ -58,7 +58,8 @@ SECRET_KEY = os.environ ['SECRET_KEY']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
-ALLOWED_HOSTS = [ 
+ALLOWED_HOSTS = [
+    '.us-east-1.elasticbeanstalk.com',
     '.compute-1.amazonaws.com', # allows viewing of instances directly
     'mitlibraries-hamlet.mit.edu',
     'localhost',
