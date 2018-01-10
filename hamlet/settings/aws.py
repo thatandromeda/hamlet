@@ -30,6 +30,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ALLOWED_HOSTS = [
     '.us-east-1.elasticbeanstalk.com',
+    '52.87.98.36',
+    '52.7.74.114', #Load balancer IP's we (Andy?) should revisit 
     '.compute-1.amazonaws.com', # allows viewing of instances directly
     'mitlibraries-hamlet.mit.edu',
     'localhost',
