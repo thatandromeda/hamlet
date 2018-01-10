@@ -4,36 +4,6 @@ import sys
 from .base import *  # noqa
 from gensim.models.doc2vec import Doc2Vec
 
-# CHECK FOR EC2 TO ADD IP TO ALLOWED HOSTS
-#-----------------------------------------------------------------------------
-def is_ec2_linux():
-    """Detect if we are running on an EC2 Linux Instance
-        See http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/identify_ec2_instances.html
-    """
-    if os.path.isfile("/sys/hypervisor/uuid"):
-        with open("/sys/hypervisor/uuid") as f:
-            uuid = f.read()
-            return uuid.startswith("ec2")
-    return False
-
-def get_linux_ec2_private_ip():
-    """Get the private IP Address of the machine if running on an EC2 linux server"""
-    try:
-        from urllib2 import urlopen
-    except:
-        from urllib.request import urlopen
-    if not is_ec2_linux():
-        return None
-    try:
-        response = urlopen('http://169.254.169.254/latest/meta-data/local-ipv4')
-        return response.read()
-    except:
-        return None
-    finally:
-        if response:
-           response.close()
-#--------------------------------------------------------------------------
-
 
 # DATABASE CONFIGURATION
 # -----------------------------------------------------------------------------
@@ -65,9 +35,16 @@ ALLOWED_HOSTS = [
     'localhost',
  ]
 
-private_ip = get_linux_ec2_private_ip()
-if private_ip:
-   ALLOWED_HOSTS.append(private_ip)
+# Apped Local EC2 IP to allowed hosts so Load Balancer is denied
+# ----------------------------------------------------------------------------
+import requests
+LOCAL_IP = None
+try:
+    LOCAL_IP = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout=0.01).text
+except requests.exceptions.RequestException:
+    pass
+if LOCAL_IP and not DEBUG:
+    ALLOWED_HOSTS.append(LOCAL_IP)
 
 # STATIC FILE CONFIGURATION
 # -----------------------------------------------------------------------------
