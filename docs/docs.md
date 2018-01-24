@@ -56,12 +56,13 @@ We tried to deploy on Heroku but the model file needs ~2GB of memory and that ge
 https://mitlibraries-hamlet.mit.edu/
 
 Environment Varibles defined in AWS for security reasons:
--All Database variables (these are standard and can put directly in your code)
--SECRET_KEY - will be created by TS3 or provided by developer securely
+* All Database variables (these are standard and can put directly in your code)
+* `SECRET_KEY` - will be created by TS3 or provided by developer securely
 
-All other variables are defined with the config files of the .ebextensions folder and can be changed/modified and or added to for future use.
+All other variables are defined with the config files of the `.ebextensions` folder and can be changed/modified and or added to for future use.
 
 aws.amazon.com -
+* make sure you're on US Easts
 * search for S3
 * find the hamlet-models bucket
 * put model files there
@@ -70,7 +71,7 @@ You should be logged in via MIT Touchstone. If you're not in the relevant moira 
 
 ### Deployment
 
-The goal is to have master autodeploy via Travis. Right now if you want something to be deployed, ask Andy.
+Master should autodeploy via Travis.
 
 AWS doesn't speak Pipfile yet, so we generate requirements.txt as part of the deploy process.
 
@@ -82,4 +83,4 @@ Static is deployed using whitenoise within the hamlet instance. It's not big eno
 
 Client connections run over https to the load balancer. Connections between the load balancer and the instance(s) are http, but on a private network only accessible by the load balancer and allowed instances. Config is in `.ebextensions/05_elb.config`.
 
-Application lgging doesn't actually work right now because the filesystem isn't persistent and we havne't thought through where AWS might want a logstream to go. #yolo
+Application logging doesn't actually work right now because the filesystem isn't persistent and we haven't thought through where AWS might want a logstream to go. #yolo
