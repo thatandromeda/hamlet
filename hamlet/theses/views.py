@@ -141,8 +141,8 @@ class UploadRecommendationView(FormView):
     def _get_similar_documents(self, doc):
         # Split document into a list of words and infer the docvec.
         bag_of_words = []
-        for chunk in doc.chunks():
-            bag_of_words.extend(str(chunk).strip().split(' '))
+        for line in doc:
+            bag_of_words.extend(line.decode('utf-8').strip().split())
 
         vector = settings.NEURAL_NET.infer_vector(bag_of_words)
 
