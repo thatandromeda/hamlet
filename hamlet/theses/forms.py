@@ -38,12 +38,8 @@ class FiletypeValidator:
         self.allowed_filetypes = allowed_filetypes
 
     def __call__(self, value):
-        chunktypes = []
-        for chunk in value.chunks():
-            chunktypes.append(magic.from_buffer(chunk, mime=True))
-
-        if not all([chunktype in self.allowed_filetypes
-                    for chunktype in chunktypes]):
+        ftype = magic.from_buffer(value.read(1024), mime=True)
+        if ftype not in self.allowed_filetypes:
             raise ValidationError(self.message %
                 {'allowed_filetypes': ', '.join(self.allowed_filetypes)})
 
