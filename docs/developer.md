@@ -8,7 +8,22 @@ This ensures that they use the test neural net. The primary keys of objects in
 the test file are written around the assumption that they will be present in
 both the test net and the fixtures.
 
-You can generate additional fixtures with statements like `python manage.py dumpdata theses.Person --pks=63970,29903 > hamlet/theses/fixtures/authors.json`, but make sure to include the pks of all objects already in the fixtures (or to write it to a separate file and then unite it with the existing - you can't just append because the json syntax will be wrong).
+You can generate additional fixtures with statements like `python manage.py dumpdata theses.Person --pks=63970,29903 > hamlet/theses/fixtures/authors.json`, but make sure to include the pks of all objects already in the fixtures (or to write it to a separate file and then unite it with the existing - you can't just append because the json syntax will be wrong). Also make sure that the theses you use are in fact present in the test neural net.
+
+### Checking that a document is in a given neural net
+
+* Make sure your settings file points to the desired `MODEL_FILE`
+* `python manage.py shell`
+
+```
+from gensim.models.doc2vec import Doc2Vec
+from django.conf import settings
+model = Doc2Vec.load(settings.MODEL_FILE)
+identifier = '1721.1-%d.txt' % YOUR THESIS IDENTIFIER HERE
+identifier in model.docvecs.doctags.keys()
+```
+
+If you don't have a target thesis object but you need one you know is in the neural net, look at the output of `model.docvecs.doctags.keys()`. This is a list of filenames of text files from dspace; they are all of the format `1721.1-NUMBER.txt`, where `NUMBER` is the identifier of the thesis. You can look up `Thesis` objects in your database by this identifier (which is `Thesis.identifier`, not the primary key).
 
 ## System configuration
 
