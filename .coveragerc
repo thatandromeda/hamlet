@@ -4,5 +4,11 @@ omit =
     */migrations/*
     */admin.py
     hamlet/settings/*
+    hamlet/static/*
+    hamlet/testmodels/*
     hamlet/wsgi.py
+    # Stuff here deserves testing, but it's also intended as a one-time
+    # process, and the priority here is getting coverage for the part of the
+    # app subject to ongoing development.
+    hamlet/neural/*
 source = ./hamlet/
