@@ -1,0 +1,60 @@
+# Documentation
+This document is for people who are trying to stand up an instance of Hamlet on localhost in order to write code. It assumes you are generally familiar with setting up development environments (for instance, that you can install Python dependencies and stand up local Postgres).
+
+## Tests
+Run tests with `python manage.py test --settings=hamlet.settings.test`.
+
+This ensures that they use the test neural net. The primary keys of objects in
+the test file are written around the assumption that they will be present in
+both the test net and the fixtures.
+
+You can generate additional fixtures with statements like `python manage.py dumpdata theses.Person --pks=63970,29903 > hamlet/theses/fixtures/authors.json`, but make sure to include the pks of all objects already in the fixtures (or to write it to a separate file and then unite it with the existing - you can't just append because the json syntax will be wrong).
+
+## System configuration
+
+### Development dependencies: pipenv
+For the most part, dependencies are installed via pipenv. There's a `.env` file (kept out of version control) for use by `pipenv shell`. It specifies:
+* `DJANGO_SETTINGS_MODULE`
+  * `DJANGO_SETTINGS_MODULE='hamlet.settings.local'` (for using heroku local)
+  * `DJANGO_SETTINGS_MODULE='hamlet.settings.base'` (for python manage.py runserver)
+* `DJANGO_DB_PASSWORD='(your password)'`
+* `DJANGO_DEBUG_IS_TRUE='True' (if you want)`
+* `DSPACE_OAI_IDENTIFIER`
+* `DSPACE_OAI_URI`
+
+The latter two are only relevant if you plan to be downloading files or metadata from DSpace. They can be omitted or given dummy values otherwise.
+
+### Additional non-pipenv dependencies
+Some dependencies require extra help:
+* tika requires Java
+* nltk may require installing corpora through the python shell
+* gensim wants a C compiler (it can run without one but will be 70x slower; a single neural net training run can take literally days in this case)
+* python-magic needs libmagic (`brew install libmagic` on OSX).
+* captcha says it needs `apt-get -y install libz-dev libjpeg-dev libfreetype6-dev python-dev` or similar. You can't yum install them on AWS, but the captcha works anyway, so maybe it's lying.
+
+You only need the first three of these if you plan to be doing neural net training. If you're developing the Django parts you can skip them; just get a prebuilt neural net file (see below, "Neural net files").
+
+### Other config
+Postgres needs a database and user (default values are `hamlet` for database name and username, no password; override this if desired in `.env` with `DJANGO_DB`, `DJANGO_DB_USER`, `DJANGO_DB_PASSWORD`)
+
+## Static assets
+If you need to edit styles, edit files in `hamlet/static/sass/apps/`. Don't edit css directly - these changes will be blown away during asset precompilation.
+
+### for `python manage.py runserver`
+* run `python manage.py collectstatic`
+* use `hamlet.settings.base`
+
+### for `heroku local`
+* run `python manage.py compress`
+* then run `python manage.py collectstatic`
+* use `hamlet.settings.local`
+
+### for AWS
+The static asset pipeline runs automatically; see `.ebextensions/02_python.config`.
+
+## Neural net files
+hamlet.model is a copy of all_theses_no_split_w4_s52.model. This is a model trained with a window size of 4 and a step of 52. It is kept out of version control because it is too big.
+
+`hamlet/testmodels/` contains some smaller models not suitable for production, but usable for testing (and small enough to be pushed to GitHub, although it will complain, and hence used on Travis). You can configure your local settings to point at these files and that will suffice for development.
+
+These models don't represent the entire MIT thesis collection (that's what lets them be smaller), so don't be surprised if documents of interest are not present.
