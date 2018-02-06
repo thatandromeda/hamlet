@@ -56,7 +56,7 @@ class Person(models.Model):
                    ', Nav.E. Massachusetts Institute of Technology',
                    ', Nav. E. Massachusetts Institute of Technology',
                    ', M.B.A. Massachusetts Institute of Technology',
-                   ' Massachusetts Institute of Technology']
+                   ', Massachusetts Institute of Technology']
 
         for deg in degrees:
             names = [name.replace(deg, '') for name in names]
@@ -94,9 +94,7 @@ class Department(models.Model):
 
     @staticmethod
     def get_or_create_from_metadata(metadata):
-        print(metadata)
         clean = Department.clean_metadata(metadata)
-        print(clean)
         dept, _ = Department.objects.get_or_create(name=clean)
         return dept
 
@@ -136,15 +134,6 @@ class Thesis(models.Model):
         help_text='Will be set to True if attempts to extract text from '
             'the pdf failed; such theses are not part of the neural net, '
             'and cannot be used in data visualization.')
-    # Contains the inferred vector for a document. Always needed for getting
-    # neural net data on documents outside of the training set. Documents
-    # inside the training set use their labels where possible, but cannot
-    # always do so (e.g. if being compared to documents outside the training
-    # set).
-    # The inferred vector is a numpy array; we use pickle to serialize it into
-    # bytes before storing it here. Access via the vector property, which
-    # unpickles.
-    _vector = models.BinaryField(blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -152,10 +141,6 @@ class Thesis(models.Model):
     @cached_property
     def label(self):
         return '1721.1-{}.txt'.format(self.identifier)
-
-    @cached_property
-    def vector(self):
-        return pickle.loads(self._vector)
 
     @cached_property
     def authors(self):
