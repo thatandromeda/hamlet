@@ -56,7 +56,7 @@ class Person(models.Model):
                    ', Nav.E. Massachusetts Institute of Technology',
                    ', Nav. E. Massachusetts Institute of Technology',
                    ', M.B.A. Massachusetts Institute of Technology',
-                   ' Massachusetts Institute of Technology']
+                   ', Massachusetts Institute of Technology']
 
         for deg in degrees:
             names = [name.replace(deg, '') for name in names]

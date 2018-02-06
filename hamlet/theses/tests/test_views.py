@@ -3,9 +3,9 @@ import re
 from django.core.urlresolvers import reverse
 from django.test import Client, RequestFactory, TestCase, override_settings
 
-from .forms import AuthorAutocompleteForm, TitleAutocompleteForm
-from .models import Thesis, Person, Contribution
-from . import views
+from ..forms import AuthorAutocompleteForm, TitleAutocompleteForm
+from ..models import Thesis, Person, Contribution
+from .. import views
 
 
 # See http://tech.novapost.fr/django-unit-test-your-views-en.html .
@@ -54,12 +54,10 @@ class SimilarToViewTests(BaseTestCase):
         assert 'suggestions' in response.context
 
         pks = [t.pk for t in response.context['suggestions']]
-        assert 43703 in pks
         assert 60330 in pks
 
         content = str(response.content)
 
-        assert 'Clock division as a power saving strategy in a system constrained by high transmission frequency and low data rate' in content  # noqa
         assert 'Architecture for ultra-low power multi-channel transmitters for Body Area Networks using RF resonators' in content  # noqa
 
     def test_get_correct_object(self):
