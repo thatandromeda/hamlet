@@ -50,7 +50,13 @@ Some dependencies require extra help:
 You only need the first three of these if you plan to be doing neural net training. If you're developing the Django parts you can skip them; just get a prebuilt neural net file (see below, "Neural net files").
 
 ### Other config
-Postgres needs a database and user (default values are `hamlet` for database name and username, no password; override this if desired in `.env` with `DJANGO_DB`, `DJANGO_DB_USER`, `DJANGO_DB_PASSWORD`)
+You may set the following environment variables to configure your database:
+* `DJANGO_DB_ENGINE` (default `django.db.backends.postgresql`)
+* `DJANGO_DB` (default `hamlet`)
+* `DJANGO_DB_USER` (default `hamlet`)
+* `DJANGO_DB_PASSWORD` (no default)
+
+If you are running with the Postgres default, be sure to stand up Postgres; create the named database and user; and grant privileges on your database to your user.
 
 ## Static assets
 If you need to edit styles, edit files in `hamlet/static/sass/apps/`. Don't edit css directly - these changes will be blown away during asset precompilation.
