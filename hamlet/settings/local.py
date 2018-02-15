@@ -15,3 +15,8 @@ SECRET_KEY = 'f=fqwc&$zt_6rf8y45j1l7w!^e*%a_c)4sf+v*_uf%hwf5_*16'
 MODEL_FILE = os.path.join(PROJECT_DIR, 'model', 'hamlet.model')
 
 NEURAL_NET = Doc2Vec.load(MODEL_FILE)
+
+# The string "PASSED" will pass any captcha.
+# Don't use this in production!
+# http://django-simple-captcha.readthedocs.io/en/latest/advanced.html#captcha-test-mode
+CAPTCHA_TEST_MODE = True
