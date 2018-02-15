@@ -16,7 +16,7 @@ django = {version = "~=1.11"}
 gunicorn = "*"
 gevent = "*"
 coverage = "*"
-gensim = "*"
+gensim = {version = "~=3.2.0"}
 nltk = "*"
 tika = "*"
 "psycopg2" = "*"
@@ -28,6 +28,8 @@ django-autocomplete-light = "*"
 python-magic = "*"
 django-simple-captcha = "*"
 pillow = "*"
+python-docx = "*"
+chardet = "*"
 
 
 [requires]

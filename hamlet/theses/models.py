@@ -1,5 +1,4 @@
 from functools import reduce
-import pickle
 import re
 
 from django.conf import settings

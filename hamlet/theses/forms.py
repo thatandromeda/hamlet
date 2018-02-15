@@ -29,22 +29,6 @@ class MimetypeValidator:
 
 
 @deconstructible
-class FiletypeValidator:
-    message = "The file type is not valid. Allowed types are: '%(allowed_filetypes)s'."  # noqa
-
-    def __init__(self, allowed_filetypes=None):
-        if allowed_filetypes is not None:
-            allowed_filetypes = [allowed_filetype.lower() for allowed_filetype in allowed_filetypes]  # noqa
-        self.allowed_filetypes = allowed_filetypes
-
-    def __call__(self, value):
-        ftype = magic.from_buffer(value.read(1024), mime=True)
-        if ftype not in self.allowed_filetypes:
-            raise ValidationError(self.message %
-                {'allowed_filetypes': ', '.join(self.allowed_filetypes)})
-
-
-@deconstructible
 class FileSizeValidator:
     message = 'The file is too large (%(size)s KB). The maximum file size is %(allowed_size)s KB.'  # noqa
 
@@ -85,16 +69,15 @@ class TitleAutocompleteForm(forms.ModelForm):
 
 
 class UploadFileForm(forms.Form):
-    allowed_extensions = ['txt']
-    allowed_mimetypes = ['text/plain']
-    allowed_filetypes = ['text/plain']
+    allowed_extensions = ['txt', 'docx']
+    allowed_mimetypes = ['text/plain',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
     max_size = 4 * 1024 * 1024
 
     file = forms.FileField(
         validators=[FileSizeValidator(max_size),
                     FileExtensionValidator(allowed_extensions),
-                    MimetypeValidator(allowed_mimetypes),
-                    FiletypeValidator(allowed_filetypes)],
+                    MimetypeValidator(allowed_mimetypes)],
         widget=forms.ClearableFileInput(attrs={'class': 'field field-upload'}),
         help_text='.txt files only.')
     captcha = CaptchaField(help_text='Sorry, no spammers.')

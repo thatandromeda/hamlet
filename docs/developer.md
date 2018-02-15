@@ -79,3 +79,6 @@ hamlet.model is a copy of all_theses_no_split_w4_s52.model. This is a model trai
 `hamlet/testmodels/` contains some smaller models not suitable for production, but usable for testing (and small enough to be pushed to GitHub, although it will complain, and hence used on Travis). You can configure your local settings to point at these files and that will suffice for development.
 
 These models don't represent the entire MIT thesis collection (that's what lets them be smaller), so don't be surprised if documents of interest are not present.
+
+`hamlet.settings.local` defaults to using the test model, since it is checked
+into version control. If you have a different model you want to use, set `DJANGO_MODEL_PATH=relative/path/to/model` in `.env`.

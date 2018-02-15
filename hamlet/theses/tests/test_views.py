@@ -1,5 +1,7 @@
+import os
 import re
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import Client, RequestFactory, TestCase, override_settings
 
@@ -233,3 +235,23 @@ class AutocompleteThesisViewTests(BaseTestCase):
         view_theses = view.get_queryset()
         assert not view_theses
         assert not db_theses
+
+
+class UploadRecommendationViewTests(BaseTestCase):
+    fix_path = os.path.join(settings.BASE_DIR, 'hamlet/theses/fixtures')
+
+    def test_upload_txt_matches_similar(self):
+        url = reverse('theses:upload_recommend')
+        with open(os.path.join(self.fix_path, '1721.1-33360.txt'), 'rb') as fp:
+            response = self.client.post(url,
+                {"file": fp, "captcha_0": "sometext", "captcha_1": "PASSED"})
+        assert "Clock division as a power saving strategy" in \
+            response.content.decode('utf-8')
+
+    def test_upload_docx_matches_similar(self):
+        url = reverse('theses:upload_recommend')
+        with open(os.path.join(self.fix_path, '1721.1-33360.docx'), 'rb') as fp:
+            response = self.client.post(url,
+                {"file": fp, "captcha_0": "sometext", "captcha_1": "PASSED"})
+        assert "Clock division as a power saving strategy" in \
+            response.content.decode('utf-8')

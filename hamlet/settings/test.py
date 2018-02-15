@@ -9,3 +9,4 @@ from .base import *
 MODEL_FILE = os.path.join(PROJECT_DIR, 'testmodels', 'testmodel.model')
 
 NEURAL_NET = Doc2Vec.load(MODEL_FILE)
+CAPTCHA_TEST_MODE = True
