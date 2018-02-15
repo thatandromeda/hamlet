@@ -28,6 +28,8 @@ django-autocomplete-light = "*"
 python-magic = "*"
 django-simple-captcha = "*"
 pillow = "*"
+python-docx = "*"
+chardet = "*"
 
 
 [requires]

@@ -14,6 +14,8 @@ from .forms import (TitleAutocompleteForm,
                     UploadFileForm)
 from .models import Thesis, Person, Contribution
 
+from .document import factory
+
 
 class SimilarToView(DetailView):
     """Given a Thesis, shows the most similar Theses."""
@@ -139,12 +141,7 @@ class UploadRecommendationView(FormView):
     threshold = 0.65
 
     def _get_similar_documents(self, doc):
-        # Split document into a list of words and infer the docvec.
-        bag_of_words = []
-        for line in doc:
-            bag_of_words.extend(line.decode('utf-8').strip().split())
-
-        vector = settings.NEURAL_NET.infer_vector(bag_of_words)
+        vector = settings.NEURAL_NET.infer_vector(doc.words)
 
         # Find the most similar docvecs to this inferred vector.
         doclist = settings.NEURAL_NET.docvecs.most_similar([vector])
@@ -160,7 +157,6 @@ class UploadRecommendationView(FormView):
 
     def form_valid(self, form):
         context = {}
-        doc = self.request.FILES['file']
-        print(dir(doc))
+        doc = factory(self.request.FILES['file'])
         context['suggestions'] = self._get_similar_documents(doc)
         return render(self.request, 'theses/similar_to.html', context)
