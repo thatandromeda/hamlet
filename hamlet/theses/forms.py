@@ -79,5 +79,5 @@ class UploadFileForm(forms.Form):
                     FileExtensionValidator(allowed_extensions),
                     MimetypeValidator(allowed_mimetypes)],
         widget=forms.ClearableFileInput(attrs={'class': 'field field-upload'}),
-        help_text='.txt files only.')
+        help_text='.txt or .docx only.')
     captcha = CaptchaField(help_text='Sorry, no spammers.')
