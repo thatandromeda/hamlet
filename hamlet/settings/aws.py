@@ -8,7 +8,7 @@ from gensim.models.doc2vec import Doc2Vec
 # DATABASE CONFIGURATION
 # -----------------------------------------------------------------------------
 
-DATABASES = {  
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ['RDS_DB_NAME'],
@@ -29,15 +29,15 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 ALLOWED_HOSTS = [
-    '.us-east-1.elasticbeanstalk.com',
-    '52.87.98.36',
-    '52.7.74.114', #Load balancer IP's we (Andy?) should revisit 
-    '.compute-1.amazonaws.com', # allows viewing of instances directly
+    '.elasticbeanstalk.com',
+    '.amazonaws.com', # allows viewing of instances directly
     'mitlibraries-hamlet.mit.edu',
+    'mitlibraries-hamlet-staging.mit.edu',
     'localhost',
+    '127.0.0.1',
  ]
 
-# Apped Local EC2 IP to allowed hosts so Load Balancer is denied
+# Append Local EC2 IP to allowed hosts
 # ----------------------------------------------------------------------------
 import requests
 LOCAL_IP = None
@@ -47,6 +47,10 @@ except requests.exceptions.RequestException:
     pass
 if LOCAL_IP and not DEBUG:
     ALLOWED_HOSTS.append(LOCAL_IP)
+
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # STATIC FILE CONFIGURATION
 # -----------------------------------------------------------------------------
