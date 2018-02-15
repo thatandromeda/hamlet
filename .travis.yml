@@ -34,4 +34,4 @@ deploy:
   skip_cleanup: true
   on:
     repo: MITLibraries/hamlet
-    branch: staging #this will be changed to master before PR is pushed
+    branch: master
