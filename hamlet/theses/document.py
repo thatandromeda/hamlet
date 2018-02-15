@@ -13,11 +13,12 @@ def factory(fp):
     :param fp: `django.core.files.uploadedfile.UploadedFile`
     :return: document object
     """
-    mimetype = magic.from_buffer(fp.read(1024), mime=True)
+    mimetype = magic.from_buffer(fp.read(8192), mime=True)
     if mimetype == "text/plain":
         return TextDocument(fp)
-    elif mimetype == "application/zip":
-        # docx is a zip archive, so this is what libmagic will see it as
+    elif mimetype in ("application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                      "application/zip"):
+        # magic has been observed identifying docx as both mimetypes
         try:
             return DocxDocument(fp)
         except:
