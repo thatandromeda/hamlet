@@ -27,4 +27,5 @@ urlpatterns = [
     # cruft to the URL.
     url(r'', include('hamlet.theses.urls', namespace='theses')),
     url(r'^captcha/', include('captcha.urls')),
+    url(r'^health/', include('health_check.urls')),
 ]

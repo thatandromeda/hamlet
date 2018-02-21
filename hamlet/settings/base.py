@@ -235,3 +235,14 @@ COMPRESS_ROOT = STATIC_ROOT
 # -----------------------------------------------------------------------------
 
 INSTALLED_APPS += ('captcha',)
+
+
+# DJANGO-HEALTH-CHECK CONFIGURATION
+# -----------------------------------------------------------------------------
+
+INSTALLED_APPS += (
+    'health_check',                             # required
+    'health_check.db',                          # stock Django health checkers
+    'health_check.cache',
+    'health_check.storage',
+)

@@ -1,9 +1,13 @@
+import logging
 import os
 import sys
+
+import requests
 
 from .base import *  # noqa
 from gensim.models.doc2vec import Doc2Vec
 
+logger = logging.getLogger(__name__)
 
 # DATABASE CONFIGURATION
 # -----------------------------------------------------------------------------
@@ -19,57 +23,60 @@ DATABASES = {
     }
 }
 
+
 # GENERAL CONFIGURATION
 # -----------------------------------------------------------------------------
-#GET SECRET KEY FROM ENV VARIABLE
-SECRET_KEY = os.environ ['SECRET_KEY']
+
+# Get secret key from env variable
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
 ALLOWED_HOSTS = [
     '.elasticbeanstalk.com',
-    '.amazonaws.com', # allows viewing of instances directly
+    '.amazonaws.com',  # allows viewing of instances directly
     'mitlibraries-hamlet.mit.edu',
     'mitlibraries-hamlet-staging.mit.edu',
     'localhost',
     '127.0.0.1',
- ]
+]
 
-# Append Local EC2 IP to allowed hosts
-# ----------------------------------------------------------------------------
-import requests
+
+# Append Local EC2 IP to ALLOWED_HOSTS.
 LOCAL_IP = None
 try:
-    LOCAL_IP = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout=0.01).text
+    LOCAL_IP = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4',  # noqa
+        timeout=0.01).text
 except requests.exceptions.RequestException:
+    logger.exception('Could not find local IP for AWS instance.')
     pass
 if LOCAL_IP and not DEBUG:
     ALLOWED_HOSTS.append(LOCAL_IP)
 
-
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+
 
 # STATIC FILE CONFIGURATION
 # -----------------------------------------------------------------------------
 
-MIDDLEWARE.insert(1,'whitenoise.middleware.WhiteNoiseMiddleware')
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 STATIC_URL = '/static/'
-STATIC_ROOT =  os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 
-#MODEL FILES STORED ON S3
-#MODELS_DIR IS AN ENV VARIABLE DEFINED IN EB AS /models
+# Model files are stored on s3.
+# MODELS_DIR is an env variable defined in eb as /models.
 MODELS_DIR = os.environ.get('MODELS_DIR')
 MODEL_FILE = os.path.join(MODELS_DIR, 'hamlet.model')
 NEURAL_NET = Doc2Vec.load(MODEL_FILE)
+
 
 # LOGGING CONFIGURATION
 # -----------------------------------------------------------------------------

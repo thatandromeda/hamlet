@@ -30,6 +30,7 @@ django-simple-captcha = "*"
 pillow = "*"
 python-docx = "*"
 chardet = "*"
+django-health-check = "*"
 
 
 [requires]
