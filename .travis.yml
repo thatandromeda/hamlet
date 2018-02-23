@@ -7,6 +7,8 @@ install:
 - pipenv install
 script: coverage run manage.py test
 after_success: coveralls
+addons:
+  postgresql: "9.6"
 services:
 - postgresql
 before_script:
@@ -18,8 +20,7 @@ env:
   - DJANGO_SETTINGS_MODULE=hamlet.settings.test
 before_deploy:
   - rm -rf hamlet/testmodels/
-  - pip freeze > requirements.txt
-  #- pipenv lock --requirements > requirements.txt # broken as of 2/23/2018
+  - pipenv lock --requirements --no-dependencies > requirements.txt # broken as of 2/23/2018
   - git add requirements.txt
   - git commit -am "requirements/testmodels cleanup"
 deploy:
