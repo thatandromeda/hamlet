@@ -18,7 +18,8 @@ env:
   - DJANGO_SETTINGS_MODULE=hamlet.settings.test
 before_deploy:
   - rm -rf hamlet/testmodels/
-  - pipenv lock --requirements > requirements.txt
+  - pip freeze > requirements.txt
+  #- pipenv lock --requirements > requirements.txt # broken as of 2/23/2018
   - git add requirements.txt
   - git commit -am "requirements/testmodels cleanup"
 deploy:
