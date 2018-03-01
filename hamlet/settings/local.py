@@ -4,7 +4,7 @@ import os
 
 from .heroku import *  # noqa
 
-ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1:8000']
 
 SECRET_KEY = 'f=fqwc&$zt_6rf8y45j1l7w!^e*%a_c)4sf+v*_uf%hwf5_*16'
 
@@ -15,10 +15,14 @@ SECRET_KEY = 'f=fqwc&$zt_6rf8y45j1l7w!^e*%a_c)4sf+v*_uf%hwf5_*16'
 # MODEL_FILE defaults to the test model used for CI; because it is checked into
 # the repo it should be present and is therefore a sensible default for local
 # development. If you want to have a production-like environment, and to use
-# a model that represents the entire database, get it separately; set the
-# env var DJANGO_MODEL_PATH to the full path to the neural net model.
-MODEL_FILE = os.environ.get('DJANGO_MODEL_PATH',
-                            os.path.join(PROJECT_DIR, 'testmodels', 'testmodel.model'))
+# a model that represents the entire database, get it separately; put it in
+# hamlet/model/hamlet.model; and add DJANGO_USE_LIVE_MODEL=True to your .env.
+modelpath = os.environ.get('DJANGO_MODEL_path', '')
+if modelpath:
+    MODEL_FILE = os.path.join(PROJECT_DIR, modelpath)
+else:
+    MODEL_FILE = os.path.join(PROJECT_DIR, 'testmodels', 'testmodel.model')
+
 NEURAL_NET = Doc2Vec.load(MODEL_FILE)
 
 # The string "PASSED" will pass any captcha.

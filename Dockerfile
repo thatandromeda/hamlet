@@ -9,7 +9,7 @@ COPY entrypoint.sh /hamlet/
 WORKDIR /hamlet
 RUN pipenv install --system --deploy
 
-ENV DJANGO_SETTINGS_MODULE "hamlet.settings.local"
+ENV DJANGO_SETTINGS_MODULE "hamlet.settings.docker"
 
 EXPOSE 8000
 
