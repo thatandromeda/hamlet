@@ -55,6 +55,7 @@ You may set the following environment variables to configure your database:
 * `DJANGO_DB` (default `hamlet`)
 * `DJANGO_DB_USER` (default `hamlet`)
 * `DJANGO_DB_PASSWORD` (no default)
+* `DJANGO_DB_HOST` (default `localhost`)
 
 If you are running with the Postgres default, be sure to stand up Postgres; create the named database and user; and grant privileges on your database to your user.
 
@@ -81,4 +82,21 @@ hamlet.model is a copy of all_theses_no_split_w4_s52.model. This is a model trai
 These models don't represent the entire MIT thesis collection (that's what lets them be smaller), so don't be surprised if documents of interest are not present.
 
 `hamlet.settings.local` defaults to using the test model, since it is checked
-into version control. If you have a different model you want to use, set `DJANGO_MODEL_PATH=relative/path/to/model` in `.env`.
+into version control. If you have a different model you want to use, set `DJANGO_MODEL_PATH=/full/path/to/model` in `.env`.
+
+## Docker
+You can start up a running instance locally using docker compose:
+
+```
+$ docker-compose up
+```
+
+By default, this will use the test model included in the codebase. If you'd like to use a different model, you will need to add it to a hamlet docker volume. This volume is mounted as `/data` in the container. You'll also need to set the `DJANGO_MODEL_PATH` env var to point to the model within that docker volume. Assuming your model files are in the top directory of the project:
+
+```
+$ docker run --name hamlet-data --mount type=volume,src=hamlet,target=/data busybox true
+$ for f in hamlet.model*; do docker cp $f hamlet-data:/data; done
+$ docker rm hamlet-data
+$ export DJANGO_MODEL_PATH=/data/hamlet.model
+$ docker-compose up
+```

@@ -1,0 +1,22 @@
+version: "3.4"
+
+services:
+  db:
+    image: postgres
+  web:
+    build: .
+    image: hamlet
+    volumes:
+      - hamlet:/data
+    environment:
+      DJANGO_DB: postgres
+      DJANGO_DB_USER: postgres
+      DJANGO_DB_HOST: db
+      DJANGO_MODEL_PATH:
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+volumes:
+  hamlet:
+    name: hamlet
