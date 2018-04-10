@@ -4,14 +4,14 @@ from hamlet.theses.models import Thesis
 
 
 class Citation(models.Model):
-    doi = models.CharField(max_length=66)
-    journal = models.TextField()
-    url = models.URLField()
-    author = models.TextField()
-    title = models.TextField()
-    isbn = models.CharField(max_length=20)
-    publisher = models.CharField(max_length=32)
-    year = models.CharField(max_length=4)
+    doi = models.CharField(max_length=66, blank=True)
+    journal = models.TextField(blank=True)
+    url = models.URLField(blank=True)
+    author = models.TextField(blank=True)
+    title = models.TextField(blank=True)
+    isbn = models.CharField(max_length=20, blank=True)
+    publisher = models.CharField(max_length=32, blank=True)
+    year = models.CharField(max_length=4, blank=True)
     raw_ref = models.TextField()
 
     # Ultimately this will want to be a many-to-many relationship with
