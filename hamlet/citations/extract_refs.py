@@ -6,12 +6,6 @@ from refextract import extract_references_from_string
 
 from django.conf import settings
 
-# If we can extract several of these from a reference, there's a pretty
-# good chance it's a legitimate citation.
-targets = {
-    'doi', 'journal', 'url', 'author', 'title', 'isbn', 'publisher', 'year'
-}
-
 localpath = os.path.join(settings.PROJECT_DIR, 'neural', 'files', 'main')
 
 
@@ -31,7 +25,8 @@ def _classify_ref(handle, refdict, goodrefs, badrefs):
     # :type badrefs: dict. Per goodrefs.
     # :rtype: dict
     # :rtype: dict
-    if len(set(refdict.keys()).intersection(targets)) >= 3:
+    if all(['raw_ref' in refdict,
+            len(refdict['raw_ref'][0]) <= 500]):
         goodrefs.setdefault(handle, []).append(refdict)
     else:
         badrefs.setdefault(handle, []).append(refdict)
@@ -49,6 +44,7 @@ def _verify_reftuple_format(reftuples):
     assert isinstance(first_tuple[0], str)
     assert isinstance(first_tuple[1], list)
     assert isinstance(first_tuple[1][0], dict)
+    assert 'raw_ref' in first_tuple[1][0].keys()
 
 
 def _find_candidate_refs(reftuples):
