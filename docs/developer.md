@@ -10,21 +10,6 @@ both the test net and the fixtures.
 
 You can generate additional fixtures with statements like `python manage.py dumpdata theses.Person --pks=63970,29903 > hamlet/theses/fixtures/authors.json`, but make sure to include the pks of all objects already in the fixtures (or to write it to a separate file and then unite it with the existing - you can't just append because the json syntax will be wrong). Also make sure that the theses you use are in fact present in the test neural net.
 
-### Checking that a document is in a given neural net
-
-* Make sure your settings file points to the desired `MODEL_FILE`
-* `python manage.py shell`
-
-```
-from gensim.models.doc2vec import Doc2Vec
-from django.conf import settings
-model = Doc2Vec.load(settings.MODEL_FILE)
-identifier = '1721.1-%d.txt' % YOUR THESIS IDENTIFIER HERE
-identifier in model.docvecs.doctags.keys()
-```
-
-If you don't have a target thesis object but you need one you know is in the neural net, look at the output of `model.docvecs.doctags.keys()`. This is a list of filenames of text files from dspace; they are all of the format `1721.1-NUMBER.txt`, where `NUMBER` is the identifier of the thesis. You can look up `Thesis` objects in your database by this identifier (which is `Thesis.identifier`, not the primary key).
-
 ## System configuration
 
 ### Development dependencies: pipenv
@@ -40,16 +25,20 @@ For the most part, dependencies are installed via pipenv. There's a `.env` file 
 The latter two are only relevant if you plan to be downloading files or metadata from DSpace. They can be omitted or given dummy values otherwise.
 
 ### Additional non-pipenv dependencies
-Some dependencies require extra help:
-* tika requires Java
-* nltk may require installing corpora through the python shell
-* gensim wants a C compiler (it can run without one but will be 70x slower; a single neural net training run can take literally days in this case)
-* python-magic needs libmagic (`brew install libmagic` on OSX).
-* captcha says it needs `apt-get -y install libz-dev libjpeg-dev libfreetype6-dev python-dev` or similar. You can't yum install them on AWS, but the captcha works anyway, so maybe it's lying.
+Some dependencies require extra help. However, you only need to bother if you are running the functions that rely on those dependencies.
 
-You only need the first three of these if you plan to be doing neural net training. If you're developing the Django parts you can skip them; just get a prebuilt neural net file (see below, "Neural net files").
+* In order to run the Django app:
+  * python-magic needs libmagic (`brew install libmagic` on OSX).
+  * captcha says it needs `apt-get -y install libz-dev libjpeg-dev libfreetype6-dev python-dev` or similar. You can't yum install them on AWS, but the captcha works anyway, so maybe it's lying.
 
-### Other config
+* In order to run OCR on thesis PDFs:
+  * tika requires Java
+
+* In order to train neural nets:
+  * nltk may require installing corpora through the python shell
+  * gensim wants a C compiler (it can run without one but will be 70x slower; a single neural net training run can take literally days in this case)
+
+### Environment Variables
 You may set the following environment variables to configure your database:
 * `DJANGO_DB_ENGINE` (default `django.db.backends.postgresql`)
 * `DJANGO_DB` (default `hamlet`)
@@ -74,15 +63,33 @@ If you need to edit styles, edit files in `hamlet/static/sass/apps/`. Don't edit
 ### for AWS
 The static asset pipeline runs automatically; see `.ebextensions/02_python.config`.
 
-## Neural net files
-hamlet.model is a copy of all_theses_no_split_w4_s52.model. This is a model trained with a window size of 4 and a step of 52. It is kept out of version control because it is too big.
+## Working with neural nets
+Hamlet needs a neural net in order to operate. By default it uses the files in `hamlet/testmodels`, but this is configurable.
 
-`hamlet/testmodels/` contains some smaller models not suitable for production, but usable for testing (and small enough to be pushed to GitHub, although it will complain, and hence used on Travis). You can configure your local settings to point at these files and that will suffice for development.
+## Using neural net files
+hamlet.model is a copy of `all_theses_no_split_w4_s52.model`. This is a model trained with a window size of 4 and a step of 52. It is kept out of version control because it is too big.
+
+`hamlet/testmodels/` contains some smaller models not suitable for production, but usable for testing (and small enough to be pushed to GitHub, although it will complain, and hence to be used on Travis). You can configure your local settings to point at these files and that will suffice for development.
 
 These models don't represent the entire MIT thesis collection (that's what lets them be smaller), so don't be surprised if documents of interest are not present.
 
 `hamlet.settings.local` defaults to using the test model, since it is checked
 into version control. If you have a different model you want to use, set `DJANGO_MODEL_PATH=/full/path/to/model` in `.env`.
+
+### Checking that a document is in a given neural net
+
+* Make sure your settings file points to the desired `MODEL_FILE`
+* `python manage.py shell`
+
+```
+from gensim.models.doc2vec import Doc2Vec
+from django.conf import settings
+model = Doc2Vec.load(settings.MODEL_FILE)
+identifier = '1721.1-%d.txt' % YOUR THESIS IDENTIFIER HERE
+identifier in model.docvecs.doctags.keys()
+```
+
+If you don't have a target thesis object but you need one you know is in the neural net, look at the output of `model.docvecs.doctags.keys()`. This is a list of filenames of text files from dspace; they are all of the format `1721.1-NUMBER.txt`, where `NUMBER` is the identifier of the thesis. You can look up `Thesis` objects in your database by this identifier (which is `Thesis.identifier`, not the primary key).
 
 ## Docker
 You can start up a running instance locally using docker compose:
