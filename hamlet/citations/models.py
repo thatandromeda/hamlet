@@ -22,3 +22,6 @@ class Citation(models.Model):
     # happens on the citation side anyway, so putting the relationship here
     # doesn't block anything.
     thesis = models.ForeignKey(Thesis)
+
+    def __str__(self):
+        return self.raw_ref

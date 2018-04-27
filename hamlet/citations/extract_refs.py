@@ -1,6 +1,7 @@
 import multiprocessing as mp
 import os
 import pickle
+import string
 
 from refextract import extract_references_from_string
 
@@ -10,6 +11,23 @@ localpath = os.path.join(settings.PROJECT_DIR, 'neural', 'files', 'main')
 
 
 # Categorizing references as good or bad ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+def _enough_punctuation(ref):
+    # Determine whether a string has a high enough percentage of punctuation
+    # to be a plausible citation.
+    #
+    # Citations have a much higher percentage of punctuation than normal
+    # free text, as citation formats dictate that they are mostly short strings
+    # (like years and personal names) set off by commas, parentheses, etc.
+    # This test has a moderate false positive rate but an extremely low false
+    # negative rate.
+    punct = len([c for c in ref if c in string.punctuation])
+    total = len(ref)
+    if round(100 * punct / total) >= 10:
+        return True
+    else:
+        return False
+
+
 def _classify_ref(handle, refdict, goodrefs, badrefs):
     # Determine whether a given candidate citation should be categorized as
     # good or bad.
@@ -25,8 +43,17 @@ def _classify_ref(handle, refdict, goodrefs, badrefs):
     # :type badrefs: dict. Per goodrefs.
     # :rtype: dict
     # :rtype: dict
-    if all(['raw_ref' in refdict,
-            len(refdict['raw_ref'][0]) <= 500]):
+    try:
+        ref = refdict['raw_ref'][0]
+    except KeyError:
+        return goodrefs, badrefs
+
+    if all([len(ref) <= 500,
+            len(ref) >= 30],
+            not ref.lower().startswith('table'),
+            not ref.lower().startswith('figure'),
+            _enough_punctuation(ref),
+            ref.upper() != ref):
         goodrefs.setdefault(handle, []).append(refdict)
     else:
         badrefs.setdefault(handle, []).append(refdict)
@@ -62,11 +89,14 @@ def _find_candidate_refs(reftuples):
     badrefs = {}
 
     for reftuple in reftuples:
-        handle = reftuple[0]
-        reflist = reftuple[1]
-        for refdict in reflist:
-            goodrefs, badrefs = \
-                _classify_ref(handle, refdict, goodrefs, badrefs)
+        try:
+            handle = reftuple[0]
+            reflist = reftuple[1]
+            for refdict in reflist:
+                goodrefs, badrefs = \
+                    _classify_ref(handle, refdict, goodrefs, badrefs)
+        except TypeError:
+            pass
 
     return goodrefs, badrefs
 
