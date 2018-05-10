@@ -27,7 +27,7 @@ The latter two are only relevant if you plan to be downloading files or metadata
 ### Additional non-pipenv dependencies
 Some dependencies require extra help. However, you only need to bother if you are running the functions that rely on those dependencies.
 
-* In order to run the Django app:
+* In order to run the Django app, including the test suite:
   * python-magic needs libmagic (`brew install libmagic` on OSX).
   * captcha says it needs `apt-get -y install libz-dev libjpeg-dev libfreetype6-dev python-dev` or similar. You can't yum install them on AWS, but the captcha works anyway, so maybe it's lying.
 
