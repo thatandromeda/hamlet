@@ -1,17 +1,12 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [dev-packages]
-
 requests = "*"
 
-
 [packages]
-
 django = {version = "~=1.11"}
 gunicorn = "*"
 gevent = "*"
@@ -31,8 +26,7 @@ pillow = "*"
 python-docx = "*"
 chardet = "*"
 django-health-check = "*"
-
+raven = "*"
 
 [requires]
-
 python_version = "3.6"
