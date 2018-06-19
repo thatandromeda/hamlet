@@ -40,6 +40,7 @@ HAMLET_APPS = [
 THIRD_PARTY_APPS = [
     'dal',
     'dal_select2',
+    'raven.contrib.django.raven_compat',
 ]
 
 INSTALLED_APPS = THIRD_PARTY_APPS + DJANGO_APPS + HAMLET_APPS
