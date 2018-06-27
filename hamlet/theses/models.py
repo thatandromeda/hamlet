@@ -60,8 +60,8 @@ class Person(models.Model):
         for deg in degrees:
             names = [name.replace(deg, '') for name in names]
 
-        # Strip leading & trailing whitespace.
-        names = [name.strip() for name in names]
+        # Strip leading & trailing whitespace and trailing periods.
+        names = [name.strip().rstrip('.') for name in names]
 
         return names
 

@@ -4,7 +4,7 @@ import os
 
 from .heroku import *  # noqa
 
-ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1:8000']
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
 
 SECRET_KEY = 'f=fqwc&$zt_6rf8y45j1l7w!^e*%a_c)4sf+v*_uf%hwf5_*16'
 
@@ -17,7 +17,7 @@ SECRET_KEY = 'f=fqwc&$zt_6rf8y45j1l7w!^e*%a_c)4sf+v*_uf%hwf5_*16'
 # development. If you want to have a production-like environment, and to use
 # a model that represents the entire database, get it separately; put it in
 # hamlet/model/hamlet.model; and add DJANGO_USE_LIVE_MODEL=True to your .env.
-modelpath = os.environ.get('DJANGO_MODEL_path', '')
+modelpath = os.environ.get('DJANGO_MODEL_PATH', '')
 if modelpath:
     MODEL_FILE = os.path.join(PROJECT_DIR, modelpath)
 else:

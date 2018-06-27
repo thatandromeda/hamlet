@@ -1,6 +1,33 @@
 # Documentation
 This document is for people who are trying to stand up an instance of Hamlet on localhost in order to write code. It assumes you are generally familiar with setting up development environments (for instance, that you can install Python dependencies and stand up local Postgres).
 
+## Standing up Hamlet
+You will need:
+* git
+* pipenv (https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv)
+* the Heroku CLI
+* postgres
+
+* Get the code and dependencies
+  * `git clone https://github.com/MITLibraries/hamlet.git`
+  * `cd hamlet`
+  * `pipenv install`
+    * If you want to do neural net training or OCR source files, there are additional non-pip dependencies; see below.
+  * `pipenv shell`
+* Set up your postgres database
+  * Create a database
+    * The name of this database should be `hamlet`, or else set an environment variable `DJANGO_DB` with its name
+  * Create a database user
+    * The name of this user should be `hamlet`, or else set an environment variable `DJANGO_DB_USER` with its name
+  * Grant all privileges on your database to your user
+  * Set an environment variable `DJANGO_DB_PASSWORD` with your database user's password
+  * `python manage.py migrate`
+  * Ask Andy or Andromeda for a data dump to populate the db.
+* Set an environment variable `DJANGO_SETTINGS_MODULE=hamlet.settings.local`
+* `python manage.py createsuperuser` and follow the prompts - this will let you log in at `/admin`
+* `python manage.py collectstatic --noinput`
+* `heroku local`
+
 ## Tests
 Run tests with `python manage.py test --settings=hamlet.settings.test`.
 

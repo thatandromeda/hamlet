@@ -35,6 +35,7 @@ DJANGO_APPS = [
 
 HAMLET_APPS = [
     'hamlet.theses',
+    'hamlet.citations',
 ]
 
 THIRD_PARTY_APPS = [
