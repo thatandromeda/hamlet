@@ -2,6 +2,7 @@ from functools import reduce
 import re
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -157,6 +158,10 @@ class Thesis(models.Model):
     def dspace_url(self):
         return 'https://dspace.mit.edu/handle/1721.1/{id}'.format(
             id=self.identifier)
+
+    def get_absolute_url(self):
+        return reverse('theses:similar_to',
+            kwargs={'identifier': self.identifier})
 
     # ~~~~~~~~~~~~~~~~~~~~~ Functions for metadata ingest ~~~~~~~~~~~~~~~~~~~~~
 

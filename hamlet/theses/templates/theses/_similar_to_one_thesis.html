@@ -10,7 +10,7 @@
         <div class="grid-item">
           <div class="panel panel-info">
             <div class="panel-heading">
-              <h3><a href="{% url 'theses:similar_to' suggestion.identifier %}">{{ suggestion.title }}</a></h3>
+              <h3><a href="{{ suggestion.get_absolute_url }}">{{ suggestion.title }}</a></h3>
               <h3 class="subtitle2">
               {% for author in suggestion.authors.all %}
                 <a href="{% url 'theses:similar_to_by_author' author.pk %}">{{ author.name }}</a>{% if not forloop.last %}; {% endif %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Your literature review buddy</h2>
+
+  <p class="copy-sup">
+    These citations have been extracted automatically from OCRed text files;
+    expect messiness!
+  </p>
+
+  {% for thesis in suggestions %}
+    {% if thesis.citation_set.all %}
+      <div class="panel panel-info">
+        <div class="panel-body">
+          <i>from</i> <a href="{{ thesis.get_absolute_url }}">{{ thesis.title }}</a>:
+          <ul class="list-unbulleted">
+            {% for citation in thesis.citation_set.all %}
+              <li>
+                {{ citation }}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endblock %}

@@ -14,4 +14,5 @@ class LitReviewBuddyView(FormView):
         context = {}
         doc = factory(self.request.FILES['file'])
         context['suggestions'] = get_similar_documents(doc)
-        return render(self.request, 'citations/lit_review_outcomes.html', context)
+        return render(self.request, 'citations/lit_review_outcomes.html',
+            context)

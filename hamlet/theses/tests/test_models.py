@@ -174,3 +174,6 @@ class ThesisTestCase(TestCase):
         thesis.add_departments([name])
 
         assert dept in thesis.department.all()
+
+    def test_get_absolute_url(self):
+        assert False

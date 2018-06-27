@@ -87,8 +87,7 @@ class SimilarToSearchView(TemplateView):
 
     def _handle_thesis(self, pk):
         thesis = Thesis.objects.get(pk=pk)
-        url = reverse('theses:similar_to',
-            kwargs={'identifier': thesis.identifier})
+        url = thesis.get_absolute_url()
         return HttpResponseRedirect(url)
 
     def get_context_data(self, **kwargs):

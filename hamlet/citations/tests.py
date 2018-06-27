@@ -20,3 +20,6 @@ class ViewTests(TestCase):
 
     def test_redirect_on_success(self):
         assert False
+
+    def test_citations_found(self):
+        assert False
