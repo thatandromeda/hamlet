@@ -37,6 +37,9 @@ both the test net and the fixtures.
 
 You can generate additional fixtures with statements like `python manage.py dumpdata theses.Person --pks=63970,29903 > hamlet/theses/fixtures/authors.json`, but make sure to include the pks of all objects already in the fixtures (or to write it to a separate file and then unite it with the existing - you can't just append because the json syntax will be wrong). Also make sure that the theses you use are in fact present in the test neural net.
 
+If you are seeing unpredictable test failures (e.g. tests that succeed in
+isolation but fail in a suite), make sure you're using the right settings file.
+
 ## System configuration
 
 ### Development dependencies: pipenv

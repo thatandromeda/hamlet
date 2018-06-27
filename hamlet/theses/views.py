@@ -9,12 +9,11 @@ from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormView
 
-from .forms import (TitleAutocompleteForm,
-                    AuthorAutocompleteForm,
-                    UploadFileForm)
-from .models import Thesis, Person, Contribution
+from hamlet.forms import UploadFileForm
 
 from .document import factory
+from .forms import TitleAutocompleteForm, AuthorAutocompleteForm
+from .models import Thesis, Person, Contribution
 
 
 class SimilarToView(DetailView):
