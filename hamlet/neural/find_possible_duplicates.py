@@ -17,6 +17,12 @@ def _get_author_lastname(name):
     return retval
 
 
+def _get_candidates_from_names(name, lastname):
+    first_initial = name.split(',')[1].strip()[0]
+    return Person.objects.filter(
+        name__iendswith=lastname, name__istartswith=first_initial)
+
+
 # The problem: name formats are different for advisors and for authors (the
 # formats are 'first last' and 'last, first' respectively). This means that the
 # same person can have different names, and thus be represented by different
@@ -28,12 +34,13 @@ def find_author_advisor_dupes():
     for p in Person.objects.all():
         name = p.name
         lastname = _get_author_lastname(name)
-        if lastname:
-            first_initial = name.split(',')[1].strip()[0]
-            candidates = Person.objects.filter(
-                name__iendswith=lastname, name__istartswith=first_initial)
-            if candidates:
-                print("Check {}".format(name))
+        if not lastname:
+            continue
+
+        candidates = _get_candidates_from_names(name, lastname)
+
+        if candidates:
+            print("Check {}".format(name))
 
 
 def _check_first_mi_last_form(name):
@@ -108,13 +115,19 @@ def switch_contributors(old_pk, new_pk):
     old.delete()
 
 
+def _names_look_like_people(names):
+    expr = r'[\w\-]*\.? [\w\-]*'
+    return all([
+        re.match(expr, names[0].strip()),
+        re.match(expr, names[1].strip()),
+    ])
+
+
+# This finds all Person instances which may actually represent multiple
+# people. This can happen when an XML field contained multiple names separated
+# by commas.
 def find_multiples():
     for p in Person.objects.all():
-        expr = r'[\w\-]*\.? [\w\-]*'
         names = p.name.split(',')
-        if len(names) > 1:
-            if all([
-                re.match(expr, names[0].strip()),
-                re.match(expr, names[1].strip()),
-            ]):
-                print("{} may contain multiple names".format(p.name))
+        if len(names) > 1 and _names_look_like_people(names):
+            print("{} may contain multiple names".format(p.name))
