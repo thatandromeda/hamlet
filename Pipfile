@@ -5,6 +5,7 @@ name = "pypi"
 
 [dev-packages]
 requests = "*"
+refextract = {git = "https://github.com/MITLibraries/refextract.git"}
 
 [packages]
 django = {version = "~=1.11"}

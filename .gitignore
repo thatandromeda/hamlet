@@ -9,6 +9,7 @@ notes/
 model/
 *.model
 *.npy
+refs.p
 
 # But we need to keep a few (chosen for smallness) so that we can run tests on
 # Travis.
