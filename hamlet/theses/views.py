@@ -1,6 +1,5 @@
 from dal import autocomplete
 
-from django.conf import settings
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
@@ -9,9 +8,10 @@ from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormView
 
-from hamlet.forms import UploadFileForm
+from hamlet.common.document import factory
+from hamlet.common.forms import UploadFileForm
+from hamlet.common.inferred_vectors import get_similar_documents
 
-from .document import factory
 from .forms import TitleAutocompleteForm, AuthorAutocompleteForm
 from .models import Thesis, Person, Contribution
 
@@ -134,28 +134,8 @@ class UploadRecommendationView(FormView):
     template_name = 'theses/upload_recommend.html'
     form_class = UploadFileForm
 
-    # Only return documents above this similarity threshold. (When similarity
-    # gets too low, it becomes meaningless. "Too low" is an art, not a
-    # science.)
-    threshold = 0.65
-
-    def _get_similar_documents(self, doc):
-        vector = settings.NEURAL_NET.infer_vector(doc.words)
-
-        # Find the most similar docvecs to this inferred vector.
-        doclist = settings.NEURAL_NET.docvecs.most_similar([vector])
-
-        # Limit to the documents above our similarity threshold. This gives a
-        # list of document filenames.
-        simdocs = [doc[0] for doc in doclist if doc[1] >= self.threshold]
-
-        # Turn filenames into document identifiers so we can feed them to SQL.
-        ids = [s.replace('1721.1-', '').replace('.txt', '') for s in simdocs]
-
-        return Thesis.objects.filter(identifier__in=ids)
-
     def form_valid(self, form):
         context = {}
         doc = factory(self.request.FILES['file'])
-        context['suggestions'] = self._get_similar_documents(doc)
+        context['suggestions'] = get_similar_documents(doc)
         return render(self.request, 'theses/similar_to.html', context)

@@ -17,3 +17,6 @@ class ViewTests(TestCase):
     def test_front_page_has_widget(self):
         response = self.client.get(reverse('home'))
         assert self.url in response.content.decode('utf-8')
+
+    def test_redirect_on_success(self):
+        assert False
