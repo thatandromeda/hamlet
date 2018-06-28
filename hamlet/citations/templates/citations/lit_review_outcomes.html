@@ -24,4 +24,10 @@
       </div>
     {% endif %}
   {% endfor %}
+
+  {% if not total_suggestions %}
+    <p>
+      Unfortunately we couldn't find anything for you. However, your <a href="https://libraries.mit.edu/research-support/">friendly local reference librarians</a> can help.
+    </p>
+  {% endif %}
 {% endblock %}

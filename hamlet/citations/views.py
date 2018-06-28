@@ -13,6 +13,10 @@ class LitReviewBuddyView(FormView):
     def form_valid(self, form):
         context = {}
         doc = factory(self.request.FILES['file'])
-        context['suggestions'] = get_similar_documents(doc)
+        simdocs = get_similar_documents(doc)
+        context['suggestions'] = simdocs
+        context['total_suggestions'] = sum([
+            doc.citation_set.count() for doc in simdocs
+        ])
         return render(self.request, 'citations/lit_review_outcomes.html',
             context)
