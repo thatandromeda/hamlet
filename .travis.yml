@@ -33,7 +33,7 @@ deploy:
   bucket_name: elasticbeanstalk-us-east-1-672626379771
   bucket_path: hamlet
   app: hamlet
-  env: Hamlet-production #change to Hamlet-prod to deploy to prod
+  env: Hamlet-prod #change to Hamlet-prod to deploy to prod
   skip_cleanup: true
   on:
     repo: MITLibraries/hamlet
