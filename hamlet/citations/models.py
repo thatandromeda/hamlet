@@ -25,3 +25,6 @@ class Citation(models.Model):
 
     def __str__(self):
         return self.raw_ref
+
+    class Meta:
+        ordering = ['raw_ref']

@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from ..models import Person, Department, Thesis
@@ -174,3 +175,9 @@ class ThesisTestCase(TestCase):
         thesis.add_departments([name])
 
         assert dept in thesis.department.all()
+
+    def test_get_absolute_url(self):
+        t = Thesis.objects.first()
+        expected = reverse('theses:similar_to',
+                           kwargs={'identifier': t.identifier})
+        assert t.get_absolute_url() == expected

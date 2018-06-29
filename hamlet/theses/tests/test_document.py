@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import UploadedFile
 from django.conf import settings
 from django.test import SimpleTestCase
 
-from ..document import DocxDocument, factory
+from hamlet.common.document import DocxDocument, factory
 
 
 class DocumentTestCase(SimpleTestCase):
