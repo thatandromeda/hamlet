@@ -25,7 +25,7 @@ Because the neural net files are too large to live on GitHub, they need to be su
 * Go to aws.amazon.com
 * Make sure you're on US East
 * Search for S3
-* Find the hamlet-models bucket
+* Find the elasticbeanstalk-us-east-2-214921548711 bucket
 * Put model files there
 
 You should be logged in via MIT Touchstone. If you're not in the relevant moira group, ask TS3. Re-uploading files will not trigger a server restart; you'll need to do that manually, or do something to update master and kick off a build.
@@ -35,7 +35,7 @@ See the scripts in `.ebextensions` for details.
 
 A few rough edges to know about:
 
-Files in the hamlet-models bucket are synced to the build server by the `.ebextensions` scripts. (These are necessary for the app to run but can't be provided via GitHub.) `hamlet.settings.aws` is configured to look for `MODEL_FILE` in the directory created by the build scripts.
+Files in the elasticbeanstalk-us-east-2-214921548711 bucket are synced to the build server by the `.ebextensions` scripts. (These are necessary for the app to run but can't be provided via GitHub.) `hamlet.settings.aws` is configured to look for `MODEL_FILE` in the directory created by the build scripts.
 
 AWS doesn't speak Pipfile yet, so we generate `requirements.txt` as part of the deploy process.
 

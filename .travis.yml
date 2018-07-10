@@ -26,15 +26,15 @@ before_deploy:
   - git commit -am "requirements/testmodels cleanup"
 deploy:
   provider: elasticbeanstalk
-  access_key_id: AKIAJQXIO6JJ6FWT7HFQ
+  access_key_id: AKIAJKJRORTATM44CW4A
   secret_access_key: # This is encrypted, so it's OK to have it here.
-    secure: JFotdLDjfTiRFlhmc1eWIT35kbocYizPgVu96bGZX1gvRudRY6x7SLsha2RPqv80ImkhWkfxhdxnCtvTUoprghk6YhA8Z28pz8BmdiZDT3i/AfGvtETSK5h7Z3Vm6wY3M37cz740+eL9rThlcElTGtz0KNtvnQglPiQJIJqaeTpMFVpV6DDYqiQd+sHo09Lyr709HsNTLq6m+AmlIrnG0keywZjQvwzg+9c73UJ1Z1iEgY0h6fAzHA4C83q1f/NUP1UBk0PFzjHNp0fcDv+Jyjl9BMx5bmz/ug7c6mlpRbTjKrS8ncvlQnR+wXSy1naFYhWJEAxRVmLqviY1PST1URFFOJoTR8bHPOWCV4jib7MFHDb0HW9U1n+6hYYRrJgvAdu9wSeShoRXBNGlX1PiL/xWbZOJFyWw6rLCCUimKci3gCfnGP/VVTlatnOm8P8J8lg6Oy4MypHfJzzhStdspj4BKfv1hQWKQbF1DRseInDjeiE29/wZ/osV7B37ArgBN2o2ikCB4kZnSlvex6zSSHZborgpSRLz36XUqhOaUcd0XbgFu5YVdyTzRjgUV0zFZKtFUqPv49kb9HboSv1D6gQV1gXtWyR8M+GL0B9mZ08om7nj0SMkbZSTNAa+PqyXwmbsYobSQa1llstCe3zuh5V5Sh4luz4uRfeAeqz2nAs=
-  region: us-east-1
-  bucket_name: elasticbeanstalk-us-east-1-672626379771
+    secure: XR2aig74nIUGMr6qwgK+yTFH+btwdO5E5y8UO5zWX7DLTfTIpQm61GjWrmhlNNS+NiL6+eZ2NSuccsHC7pccq3oM6jry5phkxQdo8e7HPkkpHnc/Nl3s/w693dFmtMJTQi1uoaP2+qZI7u4rj1m5sAzfct8VVTYwIxMosw+PVTOpawmlLgQPDNEoQ1D8m3F9waS6v/kzQuARXfV6mRzXUBYY7nlGVNboeYbDzeuUhKC18+m0ZwS3VkJEZ76TxmCtqILA4VtWC3O5UgzGkBI8DbALuU9acAhjCOfB09YmQxsyk+cww6rXbKekedrkd9QeDz6+YZ8dMK1O11xItIKpmUNONsX6sArpr81Qa76mx4Q+ctBVTQeJ+zoCjmzPs4C2QSgR68Fo6kF+Tmn2oyT44UsljhYXDQx96L4iOA65XpG62hKXqZ0idCXgkgGa0JxWWKjivp1wGKvrM9SMGiGm3droqZwb9tfNoQnATCxOgrCPhJTN9ZN1xrtB+YWKN7HtLUqXQdl24kbUOu8jGemt1yjDVQfD45vX5n1r1bMjI7JOYuqAhtOBZuxX/m4iNExE9aRDvDQ+56sHwcg3BhpypG+8pto1/+h3KqiTd+rISn3tf5g6k8AXPDl9WYSt+YTCGUQHMZiT1AvbPnpEJXqTrsA8An7p0anAs5AxaBOz3S4=
+  region: us-east-2
+  bucket_name: elasticbeanstalk-us-east-2-214921548711
   bucket_path: hamlet
   app: hamlet
   env: Hamlet-prod #change to Hamlet-prod to deploy to prod
   skip_cleanup: true
   on:
-    repo: MITLibraries/hamlet
+    repo: thatandromeda/hamlet
     branch: master
