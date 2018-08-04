@@ -36,3 +36,4 @@ deploy:
   on:
     repo: thatandromeda/hamlet
     branch: master
+  skip_cleanup: true
