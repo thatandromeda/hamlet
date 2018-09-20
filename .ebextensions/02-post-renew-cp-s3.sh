@@ -5,8 +5,8 @@ set -e
 
 # Check if there is certificate on S3 that we can use
 
-ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
-REGION=$(curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}')
+ACCOUNT_ID=214921548711
+REGION=us-east-2
 
 echo $ACCOUNT_ID
 echo $REGION

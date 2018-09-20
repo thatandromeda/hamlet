@@ -17,14 +17,13 @@ echo "bonjour"
 URL="s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/ssl.conf"
 
 count=$(aws s3 ls $URL | wc -l)
-if [ $count -gt 0 ]
-then
+if [ $count -gt 0 ] ; then
   echo "SSL Already Exists on S3"
  # Copy from S3 bucket
 
-    if [ ! -f /etc/httpd/conf.d/ssl.conf ] ; then
+  if [ ! -f /etc/httpd/conf.d/ssl.conf ] ; then
 
-	echo "copying from bucket"
+	   echo "copying from bucket"
         aws s3 cp s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/ssl.conf /etc/httpd/conf.d/ssl.conf
         aws s3 cp s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/cert.pem /etc/letsencrypt/live/$LE_SSL_DOMAIN/cert.pem
         aws s3 cp s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/privkey.pem /etc/letsencrypt/live/$LE_SSL_DOMAIN/privkey.pem
@@ -36,7 +35,7 @@ then
     fi
 
 else
-  echo "does not exist on s3"
+  echo "SSL cert does not exist on s3"
 fi
 
 # Install if no SSL certificate installed or SSL install on deploy is true
@@ -50,7 +49,7 @@ if [[ ("$LE_INSTALL_SSL_ON_DEPLOY" = true) || (! -f /etc/httpd/conf.d/ssl.conf) 
     sudo yum -y install jq
 
     # Assign value to DOCUMENT_ROOT. Should be where wsgi.py lives, we think.
-    DOCUMENT_ROOT=`opt/python/current/app/hamlet/`
+    DOCUMENT_ROOT=`/opt/python/current/app/hamlet/`
 
     SECONDS=0
 
@@ -61,7 +60,7 @@ if [[ ("$LE_INSTALL_SSL_ON_DEPLOY" = true) || (! -f /etc/httpd/conf.d/ssl.conf) 
         SECONDS=$[$SECONDS +1]
         if [ $SECONDS -gt 30 ]
         then
-            echo "$SECONDS seonds timeout waiting to ping, lets exit";
+            echo "$SECONDS seconds timeout waiting to ping, let's exit";
             exit 1;
         fi
     done

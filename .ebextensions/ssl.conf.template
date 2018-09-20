@@ -12,9 +12,9 @@ Listen 443
   </Proxy>
 
   SSLEngine             on
-  SSLCertificateFile    /etc/letsencrypt/live/hamlet.andromedayelton.com/cert.pem
-  SSLCertificateKeyFile /etc/letsencrypt/live/hamlet.andromedayelton.com/privkey.pem
-  SSLCertificateChainFile /etc/letsencrypt/live/hamlet.andromedayelton.com/fullchain.pem
+  SSLCertificateFile    /etc/letsencrypt/live/{DOMAIN}/cert.pem
+  SSLCertificateKeyFile /etc/letsencrypt/live/{DOMAIN}/privkey.pem
+  SSLCertificateChainFile /etc/letsencrypt/live/{DOMAIN}/fullchain.pem
   SSLCipherSuite        EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
   SSLProtocol           All -SSLv2 -SSLv3
   SSLHonorCipherOrder   On
