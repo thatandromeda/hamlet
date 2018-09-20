@@ -49,10 +49,10 @@ if [[ ("$LE_INSTALL_SSL_ON_DEPLOY" = true) || (! -f /etc/httpd/conf.d/ssl.conf) 
     # Install json query and get document root
     sudo yum -y install jq
 
-    # Assign value to DOCUMENT_ROOT
-    DOCUMENT_ROOT=$(sudo /opt/elasticbeanstalk/bin/get-config optionsettings | jq '."aws:elasticbeanstalk:container:php:phpini"."document_root"' -r)
+    # Assign value to DOCUMENT_ROOT. Should be where wsgi.py lives, we think.
+    DOCUMENT_ROOT=`opt/python/current/app/hamlet/`
 
-   SECONDS=0
+    SECONDS=0
 
     # Wait until domain is resolving to ec2 instance
     echo "Pinging $LE_SSL_DOMAIN until online..."
@@ -73,7 +73,7 @@ if [[ ("$LE_INSTALL_SSL_ON_DEPLOY" = true) || (! -f /etc/httpd/conf.d/ssl.conf) 
     wget https://dl.eff.org/certbot-auto;chmod a+x certbot-auto
 
     # Create certificate and authenticate
-    sudo ./certbot-auto certonly -d "$LE_SSL_DOMAIN" --agree-tos --email "$LE_EMAIL" --webroot --webroot-path /var/app/current"$DOCUMENT_ROOT" --debug --non-interactive --renew-by-default
+    sudo ./certbot-auto certonly -d "$LE_SSL_DOMAIN" --agree-tos --email "$LE_EMAIL" --webroot --webroot-path "$DOCUMENT_ROOT" --debug --non-interactive --renew-by-default
 
     # Configure ssl.conf
     sudo mv /etc/httpd/conf.d/ssl.conf.template /etc/httpd/conf.d/ssl.conf
