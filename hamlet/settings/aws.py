@@ -53,7 +53,7 @@ except requests.exceptions.RequestException:
 if LOCAL_IP and not DEBUG:
     ALLOWED_HOSTS.append(LOCAL_IP)
 
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = True
 
 
