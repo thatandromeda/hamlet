@@ -49,7 +49,7 @@ if [[ ("$LE_INSTALL_SSL_ON_DEPLOY" = true) || (! -f /etc/httpd/conf.d/ssl.conf) 
     sudo yum -y install jq
 
     # Assign value to DOCUMENT_ROOT. Should be where wsgi.py lives, we think.
-    DOCUMENT_ROOT=`/opt/python/current/app/hamlet/`
+    DOCUMENT_ROOT=`/opt/python/current/app/hamlet`
 
     SECONDS=0
 
