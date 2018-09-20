@@ -3,18 +3,18 @@
 # For use with Single instance PHP Elastic Beanstalk
 set -e
 # Loadvars
-. /opt/elasticbeanstalk/support/envvars
+. /opt/python/current/env
 
 # Check if there is certificate on S3 that we can use
 
-ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
-REGION=$(curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}')
+ACCOUNT_ID=214921548711
+REGION=us-east-2
 
-echo 214921548711
-echo us-east-2
+echo $ACCOUNT_ID
+echo $REGION
 echo "bonjour"
 
-URL="s3://elasticbeanstalk-us-east-2-214921548711/ssl/$LE_SSL_DOMAIN/ssl.conf"
+URL="s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/ssl.conf"
 
 count=$(aws s3 ls $URL | wc -l)
 if [ $count -gt 0 ]
@@ -25,10 +25,10 @@ then
     if [ ! -f /etc/httpd/conf.d/ssl.conf ] ; then
 
 	echo "copying from bucket"
-        aws s3 cp s3://elasticbeanstalk-us-east-2-214921548711/ssl/$LE_SSL_DOMAIN/ssl.conf /etc/httpd/conf.d/ssl.conf
-        aws s3 cp s3://elasticbeanstalk-us-east-2-214921548711/ssl/$LE_SSL_DOMAIN/cert.pem /etc/letsencrypt/live/$LE_SSL_DOMAIN/cert.pem
-        aws s3 cp s3://elasticbeanstalk-us-east-2-214921548711/ssl/$LE_SSL_DOMAIN/privkey.pem /etc/letsencrypt/live/$LE_SSL_DOMAIN/privkey.pem
-        aws s3 cp s3://elasticbeanstalk-us-east-2-214921548711/ssl/$LE_SSL_DOMAIN/fullchain.pem /etc/letsencrypt/live/$LE_SSL_DOMAIN/fullchain.pem
+        aws s3 cp s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/ssl.conf /etc/httpd/conf.d/ssl.conf
+        aws s3 cp s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/cert.pem /etc/letsencrypt/live/$LE_SSL_DOMAIN/cert.pem
+        aws s3 cp s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/privkey.pem /etc/letsencrypt/live/$LE_SSL_DOMAIN/privkey.pem
+        aws s3 cp s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/fullchain.pem /etc/letsencrypt/live/$LE_SSL_DOMAIN/fullchain.pem
 
         # restart
         sudo service httpd restart
@@ -91,7 +91,7 @@ echo 'copying certificate'
 
 # Copy cert to S3 regardless of outcome
 
-aws s3 cp /etc/httpd/conf.d/ssl.conf s3://elasticbeanstalk-us-east-2-214921548711/ssl/$LE_SSL_DOMAIN/ssl.conf
-aws s3 cp /etc/letsencrypt/live/$LE_SSL_DOMAIN/cert.pem s3://elasticbeanstalk-us-east-2-214921548711/ssl/$LE_SSL_DOMAIN/cert.pem
-aws s3 cp /etc/letsencrypt/live/$LE_SSL_DOMAIN/privkey.pem s3://elasticbeanstalk-us-east-2-214921548711/ssl/$LE_SSL_DOMAIN/privkey.pem
-aws s3 cp /etc/letsencrypt/live/$LE_SSL_DOMAIN/fullchain.pem s3://elasticbeanstalk-us-east-2-214921548711/ssl/$LE_SSL_DOMAIN/fullchain.pem
+aws s3 cp /etc/httpd/conf.d/ssl.conf s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/ssl.conf
+aws s3 cp /etc/letsencrypt/live/$LE_SSL_DOMAIN/cert.pem s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/cert.pem
+aws s3 cp /etc/letsencrypt/live/$LE_SSL_DOMAIN/privkey.pem s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/privkey.pem
+aws s3 cp /etc/letsencrypt/live/$LE_SSL_DOMAIN/fullchain.pem s3://elasticbeanstalk-$REGION-$ACCOUNT_ID/ssl/$LE_SSL_DOMAIN/fullchain.pem
