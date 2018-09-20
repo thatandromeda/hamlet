@@ -25,12 +25,11 @@ before_deploy:
 - git commit -am "requirements/testmodels cleanup"
 deploy:
   provider: elasticbeanstalk
-  access_key_id: AKIAIQRLT47NGT32RMEA
-  secret_access_key:
-    secure: KUCQeBshH05b6cDtZzuizXWf5CjLtxW1v2qVMZgLDQIXzZhfQJKhIpahhtO8WDRiF3CFZEc+B5JkoeJPUlyIMUK3QThJOsYqMFtt4ecpCKz0QQ0vP2+kVa2iF5iSXiGTu76VNPUfY46ydo91kOjWtUCZZCMktxj0rhmnfxWTpwDD67yVhYQXpfESKslb+zTh7pI7Gwx/sUT7oNAF75p7Y/jrNkMFrroi7KXY+9TG597pe4mq273Vdhxo2li6zx6JOWKpoe+2Hzi7tpTwUOvLG4bUFqDj+9jwqxS03aUMojVzGCfXNcAmHzrGRoPYCi8oADvqN/R9dGqn0FxIkfNmJEkdAgzNlPN7s2V/vt2t+wKoY119NX5o85qyKKWkBSGsIJoCc4WIYsnn7PKe/eAm7AZmrMBt8vPISbkq/L0QqmSpIH5W92VT3Bis5PV8ZwvDUM464MWH7ArlFFy7k2tXPanreDRAKeAxcVeyh3ki5eN7IeLubcQtbadP1MSuDkqKpEbPPqtwECrpOExCde5ONvLg4C3+IpadshvEvTauVhzlj1xFRPALkiaeDeFzBhINVNLAlcLX4/pRF3hI0YTr74p41byKF1nB+pXle1G+STGE8GRrAY8EFaCr2Tjfgb4SP1zddIiKjWHla0h9PNKqMRV2tC65j0+0fiu5PPNJx08=
+  access_key_id: $ACCESS_KEY
+  secret_access_key: $SECRET_KEY
   region: us-east-2
   bucket_name: elasticbeanstalk-us-east-2-214921548711
-  bucket_path: hamlet
+  #bucket_path: hamlet
   app: hamlet
   env: Hamlet-env
   on:
