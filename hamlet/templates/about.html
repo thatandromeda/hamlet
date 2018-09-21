@@ -5,18 +5,20 @@
 <h2>About hamlet</h2>
 
 <p>
-  Hamlet uses machine learning to power experimental, exploratory interfaces to MIT's thesis collection.
+  Hamlet uses machine learning to power experimental, exploratory interfaces to the MIT thesis collection.
 </p>
 
 <p>
-  It is _extremely_ in alpha right now; lots of the interfaces are not yet written; there has been no UX consideration; the server may break at any time without warning. Check back to see how hamlet grows! You can send feedback to Andromeda Yelton (m31@mit.edu).
+  It is <i>extremely</i> in alpha right now. Some of the interfaces are not yet written; there has been no UX consideration; the server may break at any time without warning. Check back to see how hamlet grows! You can <a href="mailto:andromeda.yelton@gmail.com?subject=hamlet feedback">send feedback to Andromeda Yelton</a>.
 </p>
 
 <ul class="list-inline-pipe">
   <li><a href="#how-it-works">How it works</a></li>
-  <li><a href="#team">The team</a></li>
+  <li><a href="#team">Who made this</a></li>
   <li><a href="#tech">The tech stack</a></li>
 </ul>
+
+<hr />
 
 <h3><a id="how-it-works"></a>How it works</h3>
 <p>
@@ -71,43 +73,55 @@
   The hamlet back end is a neural net that learned a concept space from the MIT thesis collection. The front end is where we ask questions.
 </p>
 
-<h3><a id="team"></a>The team</h3>
+<hr />
+
+<h3><a id="team"></a>Who made this</h3>
 
 <div class="layout-1q3q layout-band">
   <div class="col3q">
-    <b>Andromeda Yelton</b> is the technical lead for hamlet. She's a senior software engineer at the MIT Libraries and the 2017-2018 President of the <a href="//www.lita.org">Library & Information Technology Association.</a> She wrote the back end, including the machine learning parts, and the text-based parts of the front end.
+    <p>
+      <b>Andromeda Yelton</b> is the lead for hamlet. She's a software engineer at the <a href="https://cyber.harvard.edu">Berkman Klein Center</a> (formerly at the <a href="https://libraries.mit.edu">MIT Libraries</a>) and the 2017-2018 President of the <a href="//www.lita.org">Library &amp; Information Technology Association.</a> She wrote most of the code: the machine learning; processing pipeline to extract fulltext and metadata from <a href="https://dspace.mit.edu">dSpace</a>; and the front and back ends of the Django app.
+    </p>
   </div>
   <aside class="col1q">
-    {# picture goes here #}
+    <img src="https://andromedayeltondotcom.files.wordpress.com/2010/05/andromeda-by-molly-color.jpg?w=600&h=400" alt="Andromeda's headshot">
   </aside>
+</div>
+<br />
+<div class="layout-4q layout-band">
+  <div class="col4q">
+    <p>
+      Thanks also go to the following:
+    </p>
+    <ul class="list-unbulleted">
+      <li>
+        🦄 <b>Frances Botsford</b>, who wrote the (modular, readable, wondrous) style system;
+      </li>
+      <li>
+        🖥️ <b>Andy Dorner</b>, who set up the AWS pipeline;
+      </li>
+      <li>
+        🧙‍ <b>Mike Graves</b>, who improved the file upload process and researched  citation processing options;
+      </li>
+      <li>
+        🌈 <b>Helen Bailey</b>, whose dSpace extraction work I adapted, and who is hamlet's once and future data visualization wonk.
+      </li>
+      <li>
+        🏛️ All the catalogers and techies who have added theses to dSpace and kept it going over the years.
+      </li>
+    </ul>
+  </div>
 </div>
 
 <hr />
-
-<div class="layout-1q3q layout-band">
-  <div class="col3q">
-    <b>Helen Bailey</b> {# does some kind of awesome data vis stuff #}
-  </div>
-  <aside class="col1q">
-    {# <img src="http://libraries.mit.edu/img/staff-photos/hbailey.jpg" /> #}
-  </aside>
-</div>
-
-<hr />
-
-<div class="layout-1q3q layout-band">
-  <div class="col3q">
-    <b>Andy Dorner</b> {# makes the spaceship go #}
-  </div>
-  <aside class="col1q">
-    {# picture goes here #}
-  </aside>
-</div>
-
-<hr />
-
-Additional thanks go to Frances Botsford, for writing the modular, stylish wonder that is the MIT Libraries stylesheet.
 
 <h3><a id="tech"></a>The tech stack</h3>
-{# tbd - not enough of it is stable yet #}
+
+<p>
+  hamlet is a <a href="https://www.djangoproject.com/">Django</a> app, backed by a <a href="https://www.postgresql.org/">postgres</a> database and a neural net trained using <a href="https://radimrehurek.com/gensim/">gensim</a> on the fulltext of approximately 43,000 MIT graduate theses living in <a href="https://dspace.mit.edu/">dSpace@MIT</a>.
+</p>
+
+<p>
+  Its code lives on <a href="https://github.com/thatandromeda/hamlet">GitHub</a> and it's hosted on <a href="https://aws.amazon.com/">AWS</a>.
+</p>
 {% endblock %}
