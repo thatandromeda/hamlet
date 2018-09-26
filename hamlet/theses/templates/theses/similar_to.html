@@ -2,7 +2,7 @@
 
 {% block content %}
   {% if thesis %}
-    <h2>Theses most similar to <em>{{ thesis.title }}</em> ({{ thesis.authors.first.name }}; {{ thesis.year }}) <span class="copy-sup"><a href="thesis.dspace_url">read it</a></span></h2>
+    <h2>Theses most similar to <em>{{ thesis.title }}</em> ({{ thesis.authors.first.name }}; {{ thesis.year }}) <span class="copy-sup"><a href="{{ thesis.dspace_url }}">read it</a></span></h2>
   {% else %}
     <h2>Theses most similar to your uploaded text</h2>
   {% endif %}
