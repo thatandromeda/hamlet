@@ -5,7 +5,6 @@ import sys
 import requests
 
 from .base import *  # noqa
-from .storage import WhiteNoiseStaticFilesStorage
 from gensim.models.doc2vec import Doc2Vec
 
 logger = logging.getLogger(__name__)
@@ -66,7 +65,7 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATICFILES_STORAGE = 'WhiteNoiseStaticFilesStorage'
+STATICFILES_STORAGE = 'hamlet.settings.storage.WhiteNoiseStaticFilesStorage'
 
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
