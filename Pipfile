@@ -28,6 +28,7 @@ python-docx = "*"
 chardet = "*"
 django-health-check = "*"
 raven = "*"
+boto = "==2.48.0"
 
 [requires]
 python_version = "3.6"
