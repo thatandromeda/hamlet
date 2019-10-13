@@ -65,7 +65,7 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'hamlet.settings.storage.WhiteNoiseStaticFilesStorage'
 
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
@@ -109,4 +109,4 @@ LOGGING = {
 }
 
 # Will be emailed by the management command about API usage.
-ADMINS = [('Andromeda Yelton', 'm31@mit.edu')]
+ADMINS = [('Andromeda Yelton', 'andromeda.yelton@gmail.com')]
