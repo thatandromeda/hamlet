@@ -3,8 +3,6 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import django.db.models.deletion
-
 
 class Migration(migrations.Migration):
 
@@ -28,7 +26,7 @@ class Migration(migrations.Migration):
                 ('publisher', models.CharField(max_length=32)),
                 ('year', models.CharField(max_length=4)),
                 ('raw_ref', models.TextField()),
-                ('thesis', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='theses.Thesis')),
+                ('thesis', models.ForeignKey(on_delete=models.CASCADE, to='theses.Thesis')),
             ],
         ),
     ]

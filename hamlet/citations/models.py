@@ -21,7 +21,7 @@ class Citation(models.Model):
     # Citations can't be ManyToMany with Theses before metadata cleanup
     # happens on the citation side anyway, so putting the relationship here
     # doesn't block anything.
-    thesis = models.ForeignKey(Thesis)
+    thesis = models.ForeignKey(Thesis, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.raw_ref

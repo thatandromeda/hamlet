@@ -2,7 +2,7 @@ from functools import reduce
 import re
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -194,8 +194,8 @@ class Thesis(models.Model):
         """Takes METS format metadata and finds degrees."""
         result = []
         try:
-            degree = re.findall('[A-Z][a-z]{,4}\.? ?[A-Z][a-z]{,3}\.?[A-Z]?\.?'
-                                '[A-Z]?\.?[A-Z]?\.?', degree_statement)
+            degree = re.findall(r'[A-Z][a-z]{,4}\.? ?[A-Z][a-z]{,3}\.?[A-Z]?\.?'
+                                r'[A-Z]?\.?[A-Z]?\.?', degree_statement)
             for item in degree:
                 i = item.replace(' ', '')
                 i = i.rstrip('.')
@@ -247,6 +247,6 @@ class Contribution(models.Model):
         (ADVISOR, ADVISOR),
     )
 
-    thesis = models.ForeignKey(Thesis)
-    person = models.ForeignKey(Person)
+    thesis = models.ForeignKey(Thesis, on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
     role = models.CharField(max_length=7, choices=ROLE_CHOICES)
