@@ -1,8 +1,10 @@
-from django.conf.urls import url
+from django.urls import path
 
 from . import views
 
+app_name = 'citations'
+
 urlpatterns = [
-    url(r'^lit_review_buddy/$',
+    path('lit_review_buddy/',
         views.LitReviewBuddyView.as_view(), name='lit_review_buddy'),
 ]

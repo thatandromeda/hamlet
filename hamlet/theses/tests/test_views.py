@@ -2,7 +2,7 @@ import os
 import re
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import Client, RequestFactory, TestCase, override_settings
 
 from ..forms import AuthorAutocompleteForm, TitleAutocompleteForm
@@ -44,7 +44,7 @@ class SimilarToViewTests(BaseTestCase):
         assert response.context['unextractable'] is True
         assert 'suggestions' not in response.context
         # There are no links to other theses.
-        assert not re.search('/similar_to/\d+', str(response.content))
+        assert not re.search(r'/similar_to/\d+', str(response.content))
 
     def test_suggestion_context(self):
         thesis = Thesis.objects.get(pk=76265)
