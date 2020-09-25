@@ -1,9 +1,10 @@
 # IN PROGRESS
-
-# TO DO
 - then stepwise to 2.2
     + 2.2 is LTS so I can stay here.
     + 3.1 is latest stable, but 3 won't be LTS until 3.2 in 2021, so I SHOULD stay on 2.2.
+    + current issue: things aren't in the static manifest. base settings works, local does not, aws is different and might work??
+
+# TO DO
 - check postgres version on AWS
     - 2.1 dropped support for < 9.4
 - check deploy script for migration-running
