@@ -1,17 +1,16 @@
 # IN PROGRESS
-- then stepwise to 2.2
-    + 2.2 is LTS so I can stay here.
-    + 3.1 is latest stable, but 3 won't be LTS until 3.2 in 2021, so I SHOULD stay on 2.2.
-    + current issue: things aren't in the static manifest. base settings works, local does not, aws is different and might work??
 
 # TO DO
-- check postgres version on AWS
-    - 2.1 dropped support for < 9.4
-- check deploy script for migration-running
-- backup db before deploy
 
 # OPTIONAL
 - migrate raven (it's deprecated) to https://github.com/getsentry/sentry-python
+- figure out fail2ban or something because all your traffic is people probing for vulns
+- update AWS environment
+    - note that this moves from apache to nginx
+- update postgres
+    - you're on 9.6.11
+    - latest is 13 (!) (but they changed the policy I think so major numbers change much faster)
+    - 9.6 is supported through November 2021 (!) but it's up to 9.6.19
 
 # DONE
 - run tests under 1.11 and fix deprecation warnings (`python -Wa manage.py test --settings=hamlet.settings.test`)
@@ -27,3 +26,13 @@
 - see if I use `RedirectView` and need to handle `NoReverseMatch` exceptions
 - run tests under 2.0 and fix deprecation warnings
 - then stepwise to 2.1
+- check postgres version on AWS
+    - 2.1 dropped support for < 9.4
+    - it's pg 9.6 so we're all good
+- backup db before deploy
+- check deploy script for migration-running
+- then stepwise to 2.2
+    + 2.2 is LTS so I can stay here.
+    + 3.1 is latest stable, but 3 won't be LTS until 3.2 in 2021, so I SHOULD stay on 2.2.
+    + current issue: things aren't in the static manifest. base settings works, local does not, aws is different and might work??
+
