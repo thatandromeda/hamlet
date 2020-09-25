@@ -1,9 +1,6 @@
 # IN PROGRESS
-- upgrade to django 2.0
 
 # TO DO
-- use updated URL routing syntax
-- look for `from django.conf.urls import include` and update to `from django.urls import include`
 - check to see if I have a model inheriting from AbstractUser https://docs.djangoproject.com/en/3.1/releases/2.0/#abstractuser-last-name-max-length-increased-to-150
 - see if I use QuerySet.reverse() or .last() https://docs.djangoproject.com/en/3.1/releases/2.0/#queryset-reverse-and-last-are-prohibited-after-slicing
 - remove `SessionAuthenticationMiddleware` if used
@@ -21,4 +18,7 @@
 - run tests under 1.11 and fix deprecation warnings (`python -Wa manage.py test --settings=hamlet.settings.test`)
 - check each of these: https://eldarion.com/blog/2017/12/26/10-tips-upgrading-django-20/
 - update to best available version of deps before updating django
+- upgrade to django 2.0
+- use updated URL routing syntax
+- look for `from django.conf.urls import include` and update to `from django.urls import include`
 
