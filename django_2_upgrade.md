@@ -1,4 +1,5 @@
 # IN PROGRESS
+- upgrade to django 2.0
 
 # TO DO
 - use updated URL routing syntax
