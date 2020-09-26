@@ -35,4 +35,5 @@
     + 2.2 is LTS so I can stay here.
     + 3.1 is latest stable, but 3 won't be LTS until 3.2 in 2021, so I SHOULD stay on 2.2.
     + current issue: things aren't in the static manifest. base settings works, local does not, aws is different and might work??
+- fix links, they're broken: https://hamlet.andromedayelton.com/similar_to/author/(55562)/ works, https://hamlet.andromedayelton.com/similar_to/author/55562/ does not
 

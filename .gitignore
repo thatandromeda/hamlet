@@ -6,6 +6,7 @@ temp.pdf
 notes/
 aws_rootkey.csv
 *.pem
+django_2_upgrade.md
 
 # These files are actually needed for the operation of the system, but are too
 # large for github (even git-lfs), which causes pushes to github to be rejected.
