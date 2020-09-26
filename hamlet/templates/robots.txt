@@ -1,0 +1,19 @@
+User-agent: SemrushBot
+Allow: /about
+Disallow: /
+
+User-agent: PetalBot
+Allow: /about
+Disallow: /
+
+User-agent: Googlebot
+Allow: /about
+Disallow: /
+
+User-agent: Bingbot
+Allow: /about
+Disallow: /
+
+User-agent: MJ12bot
+Allow: /about
+Disallow: /
