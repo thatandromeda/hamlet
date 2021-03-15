@@ -9,7 +9,7 @@ We tried to deploy on Heroku but the model file needs ~2GB of memory and that ge
 
 ### Deployment
 
-Hamlet automatically builds to AWS (at https://mitlibraries-hamlet.mit.edu/) via Travis on updates to `master`.
+Hamlet automatically builds to AWS (at https://hamlet.andromedayelton.com/) via Travis on updates to `master`.
 * The build process: see `.ebextensions` files
 * Config: `.elasticbeanstalk/config.yml` and `.travis.yml`
 
