@@ -1,0 +1,61 @@
+# From https://dev.to/vlntsolo/django-full-ci-cd-flow-to-aws-with-github-actions-and-s3-2enp#1-aws-beanstalk-environment
+name: CI-CD pipeline to AWS
+env:
+  EB_S3_BUCKET_NAME: "elasticbeanstalk-us-east-2-214921548711"
+  EB_APPLICATION_NAME: "hamlet"
+  EB_ENVIRONMENT_NAME: "Hamlet-env"
+  DEPLOY_PACKAGE_NAME: "django-app-${{ github.sha }}.zip"
+  AWS_REGION_NAME: "us-east-2"
+
+on:
+  push:
+    branches:
+      - master #Use your own branch here (Might be staging or testing)
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: [3.6.10]
+    steps:
+      - name: Git clone on our repo
+        uses: actions/checkout@v2
+
+      - name: Create zip deployment package
+        run: zip -r ${{ env.DEPLOY_PACKAGE_NAME }} ./ -x *.git*
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.aws_access_key_id }}
+          aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
+          aws-region: ${{ env.AWS_REGION_NAME }}
+      - name: Copying file to S3
+        run: aws s3 cp ${{ env.DEPLOY_PACKAGE_NAME }} s3://${{ env.EB_S3_BUCKET_NAME }}/
+      - name: Print nice message on success finish
+        run: echo "CI part finished successfuly"
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.aws_access_key_id }}
+          aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
+          aws-region: ${{ env.AWS_REGION_NAME }}
+
+      - name: Create new EBL app ver
+        run: |
+          aws elasticbeanstalk create-application-version \
+          --application-name ${{ env.EB_APPLICATION_NAME }} \
+          --source-bundle S3Bucket="${{ env.EB_S3_BUCKET_NAME }}",S3Key="${{ env.DEPLOY_PACKAGE_NAME }}" \
+          --version-label "${{ github.sha }}"
+
+      - name: Deploy new app
+        run: aws elasticbeanstalk update-environment --environment-name ${{ env.EB_ENVIRONMENT_NAME }} --version-label "${{ github.sha }}"
+      - name: Print nice message on success finish
+        run: echo "CD part finished successfuly"
+
+
+# 4) [steps] block lists names and actual commands to execute on the virtual machine.
