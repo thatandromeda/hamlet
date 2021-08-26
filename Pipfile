@@ -15,7 +15,6 @@ coverage = "*"
 gensim = {version = "~=3.2.0"}
 nltk = "*"
 tika = "*"
-"psycopg2" = "*"
 whitenoise = "*"
 dj-database-url = "*"
 django-compressor = "*"
@@ -29,6 +28,7 @@ chardet = "*"
 django-health-check = "*"
 raven = "*"
 boto = "==2.48.0"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.8"
