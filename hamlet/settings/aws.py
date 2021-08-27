@@ -40,6 +40,7 @@ ALLOWED_HOSTS = [
     '.amazonaws.com',  # allows viewing of instances directly
     'localhost',
     '127.0.0.1',
+    '172.31.12.168'
 ]
 
 
