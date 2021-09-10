@@ -35,11 +35,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ALLOWED_HOSTS = [
     'hamlet.andromedayelton.com',
-    'hamlet-env-2021.x4aim8xe8z.us-east-2.elasticbeanstalk.com',
-    'hamlet-env.x4aim8xe8z.us-east-2.elasticbeanstalk.com',
-    '.amazonaws.com',  # allows viewing of instances directly
-    'localhost',
-    '127.0.0.1',
+    'hamletenv2021small-env.eba-dpvfh2yj.us-east-2.elasticbeanstalk.com'
 ]
 
 
