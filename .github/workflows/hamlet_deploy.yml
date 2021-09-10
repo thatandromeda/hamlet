@@ -2,7 +2,7 @@
 name: CI-CD pipeline to AWS
 env:
   EB_S3_BUCKET_NAME: "elasticbeanstalk-us-east-2-214921548711"
-  EB_APPLICATION_NAME: "hamlet"
+  EB_APPLICATION_NAME: "hamlet-env-2021-small"
   EB_ENVIRONMENT_NAME: "Hamletenv2021small-env"
   DEPLOY_PACKAGE_NAME: "django-app-${{ github.sha }}.zip"
   AWS_REGION_NAME: "us-east-2"
