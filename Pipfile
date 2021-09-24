@@ -29,6 +29,7 @@ django-health-check = "*"
 raven = "*"
 boto = "==2.48.0"
 psycopg2 = "==2.8.6"
+cython = "*"
 
 [requires]
 python_version = "3.8"
