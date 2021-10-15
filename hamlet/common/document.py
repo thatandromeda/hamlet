@@ -14,10 +14,11 @@ def factory(fp):
     :return: document object
     """
     mimetype = magic.from_buffer(fp.read(8192), mime=True)
-    if mimetype == "text/plain":
+    if mimetype in ["text/plain", "text/x-c'"]:
         return TextDocument(fp)
-    elif mimetype in ("application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                      "application/zip"):
+    elif mimetype in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                      "application/zip",
+                      "application/msword"]:
         # magic has been observed identifying docx as both mimetypes
         try:
             return DocxDocument(fp)
