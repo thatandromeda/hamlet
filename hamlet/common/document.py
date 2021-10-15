@@ -14,7 +14,7 @@ def factory(fp):
     :return: document object
     """
     mimetype = magic.from_buffer(fp.read(8192), mime=True)
-    if mimetype in ["text/plain", "text/x-c'"]:
+    if mimetype in ["text/plain", "text/x-c"]:
         return TextDocument(fp)
     elif mimetype in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                       "application/zip",
