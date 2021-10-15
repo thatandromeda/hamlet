@@ -27,7 +27,7 @@ chardet = "*"
 django-health-check = "*"
 raven = "*"
 boto = "==2.48.0"
-psycopg2 = "*"
+psycopg2 = "==2.8.6"
 gensim = "~=3.5.0"
 
 [requires]
