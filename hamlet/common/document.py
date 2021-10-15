@@ -22,9 +22,9 @@ def factory(fp):
         try:
             return DocxDocument(fp)
         except:
-            raise ValidationError("Invalid document type")
+            raise ValidationError(f"Invalid document type: {mimetype}")
     else:
-        raise ValidationError("Invalid document type")
+        raise ValidationError(f"Invalid document type: {mimetype}")
 
 
 class TextDocument:
