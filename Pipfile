@@ -12,7 +12,6 @@ django = {version = "~=2.2.0"}
 gunicorn = "*"
 gevent = "*"
 coverage = "*"
-gensim = {version = "~=3.2.0"}
 nltk = "*"
 tika = "*"
 whitenoise = "*"
@@ -28,7 +27,8 @@ chardet = "*"
 django-health-check = "*"
 raven = "*"
 boto = "==2.48.0"
-psycopg2 = "==2.8.6"
+psycopg2 = "*"
+gensim = "~=3.5.0"
 
 [requires]
 python_version = "3.8"
